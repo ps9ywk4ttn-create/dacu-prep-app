@@ -565,6 +565,29 @@ textarea {
   line-height: 1.6;
 }
 
+.log-mode {
+  margin: 0;
+  padding: 9px 10px;
+  border: 1px solid #dbeafe;
+  border-radius: 6px;
+  background: #eff6ff;
+  color: #1d4ed8;
+  font-size: 13px;
+  font-weight: 900;
+}
+
+.log-mode[data-type="ok"] {
+  border-color: #bbf7d0;
+  background: #f0fdf4;
+  color: #047857;
+}
+
+.log-mode[data-type="warn"] {
+  border-color: #fde68a;
+  background: #fffbeb;
+  color: #b45309;
+}
+
 .log-actions {
   display: flex;
   align-items: center;
@@ -579,7 +602,7 @@ textarea {
 }
 
 .log-table {
-  min-width: 980px;
+  min-width: 1080px;
 }
 
 .log-table td {
