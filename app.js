@@ -313,13 +313,20 @@ function getLoginLogAdminKey() {
   return entered;
 }
 
+function base64Utf8(value) {
+  const bytes = new TextEncoder().encode(value);
+  let binary = "";
+  for (const byte of bytes) binary += String.fromCharCode(byte);
+  return btoa(binary);
+}
+
 async function fetchRemoteLoginLogs() {
   const adminKey = getLoginLogAdminKey();
   if (!adminKey) return null;
   const response = await fetch(loginLogApiUrl(), {
     method: "GET",
     headers: {
-      "X-Admin-Key": adminKey
+      "X-Admin-Key-Encoded": base64Utf8(adminKey)
     },
     cache: "no-store"
   });
@@ -2330,7 +2337,7 @@ async function clearLoginLogs() {
     if (!adminKey) return;
     const response = await fetch(loginLogApiUrl(), {
       method: "DELETE",
-      headers: { "X-Admin-Key": adminKey }
+      headers: { "X-Admin-Key-Encoded": base64Utf8(adminKey) }
     });
     if (!response.ok) {
       alert("远程日志清空失败");
