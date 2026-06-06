@@ -137,93 +137,78 @@ h3 {
 }
 
 .easter-egg-btn {
-  min-width: 132px;
-  min-height: 56px;
+  min-width: 176px;
+  min-height: 52px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 10px;
+  gap: 12px;
   position: relative;
-  isolation: isolate;
-  border: 1px solid #ffd3e3;
+  border: 1px solid #fbcfe8;
   border-radius: 18px;
-  background:
-    radial-gradient(circle at 16px 13px, rgba(255, 255, 255, 0.96) 0 9px, transparent 10px),
-    radial-gradient(circle at 104px 42px, rgba(255, 244, 186, 0.8) 0 8px, transparent 9px),
-    linear-gradient(135deg, #fff7ad 0%, #ffd6e8 48%, #dbeafe 100%);
-  color: #9f1239;
+  background: linear-gradient(135deg, #ffffff 0%, #fff1f7 100%);
+  color: #831843;
   font-weight: 900;
-  box-shadow: 0 12px 24px rgba(244, 63, 94, 0.18);
+  box-shadow: 0 10px 22px rgba(219, 39, 119, 0.11);
   cursor: pointer;
-  transition: transform 140ms ease, box-shadow 140ms ease, border-color 140ms ease;
+  transition: transform 140ms ease, box-shadow 140ms ease, border-color 140ms ease, background 140ms ease;
 }
 
 .easter-egg-btn:hover {
   border-color: #fb7185;
-  transform: translateY(-2px) rotate(-1deg);
-  box-shadow: 0 16px 30px rgba(244, 63, 94, 0.24);
-}
-
-.easter-egg-btn::after {
-  content: "♡";
-  position: absolute;
-  top: -9px;
-  right: 12px;
-  z-index: -1;
-  color: #fb7185;
-  font-size: 18px;
-  transform: rotate(12deg);
+  background: linear-gradient(135deg, #ffffff 0%, #ffe4ef 100%);
+  transform: translateY(-1px);
+  box-shadow: 0 14px 28px rgba(219, 39, 119, 0.16);
 }
 
 .egg-mark {
-  width: 34px;
-  height: 40px;
+  width: 32px;
+  height: 28px;
   position: relative;
-  display: inline-block;
+  display: inline-grid;
+  place-items: center;
   flex: 0 0 auto;
-  border: 2px solid #f9a8d4;
-  border-radius: 52% 52% 45% 45%;
-  background: linear-gradient(180deg, #ffffff 0%, #ffe4ef 100%);
-  box-shadow: inset 0 -5px 0 rgba(251, 113, 133, 0.16), 0 5px 10px rgba(190, 18, 60, 0.14);
+  border: 1px solid #f9a8d4;
+  border-radius: 10px;
+  background: #ffffff;
+  box-shadow: inset 0 -3px 0 rgba(249, 168, 212, 0.22);
 }
 
 .egg-mark::before {
-  content: "";
+  content: "✦";
   position: absolute;
-  top: 15px;
-  left: 9px;
-  width: 4px;
-  height: 4px;
-  border-radius: 50%;
-  background: #9f1239;
-  box-shadow: 12px 0 0 #9f1239;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  color: #db2777;
+  font-size: 17px;
 }
 
 .egg-mark::after {
   content: "";
   position: absolute;
-  left: 12px;
-  top: 24px;
-  width: 10px;
-  height: 5px;
-  border-bottom: 2px solid #9f1239;
-  border-radius: 0 0 999px 999px;
+  right: -3px;
+  top: -3px;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #f9a8d4;
 }
 
 .egg-copy {
   display: grid;
-  gap: 1px;
+  gap: 2px;
   text-align: left;
   line-height: 1.05;
 }
 
 .egg-copy strong {
-  font-size: 15px;
+  font-size: 16px;
 }
 
 .egg-copy small {
-  color: #be123c;
-  font-size: 11px;
+  color: #be185d;
+  font-size: 12px;
   font-weight: 900;
 }
 
@@ -454,15 +439,26 @@ textarea {
 }
 
 .egg-modal-card {
-  width: min(560px, 100%);
+  width: min(640px, 100%);
   position: relative;
   display: grid;
-  gap: 14px;
+  gap: 12px;
   padding: 22px;
-  border: 1px solid #fecdd3;
-  border-radius: 10px;
+  border: 1px solid #fbcfe8;
+  border-radius: 12px;
   background: #ffffff;
   box-shadow: 0 24px 70px rgba(15, 23, 42, 0.24);
+}
+
+.egg-modal-card h2 {
+  padding-right: 44px;
+}
+
+.egg-subtitle {
+  margin: 0;
+  color: #be185d;
+  font-size: 14px;
+  font-weight: 800;
 }
 
 .egg-close {
@@ -481,31 +477,53 @@ textarea {
 }
 
 .egg-image-frame {
-  min-height: 320px;
+  width: 100%;
+  min-height: 360px;
   display: grid;
   place-items: center;
   overflow: hidden;
-  border: 1px dashed #f9a8d4;
+  padding: 0;
+  border: 1px solid #fbcfe8;
   border-radius: 8px;
   background: #fff7fb;
+  cursor: pointer;
 }
 
 .egg-image-frame img {
   width: 100%;
   height: 100%;
   max-height: 520px;
+  display: block;
   object-fit: contain;
 }
 
-.egg-image-frame img:not([src]),
-.egg-image-frame img[src=""] {
-  display: none;
+.egg-modal-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
 }
 
-.egg-image-frame p {
-  margin: 0;
-  color: #be123c;
+.egg-counter {
+  color: #64748b;
+  font-size: 13px;
   font-weight: 800;
+}
+
+.egg-next {
+  min-height: 38px;
+  padding: 0 16px;
+  border: 1px solid #fbcfe8;
+  border-radius: 999px;
+  background: #fff1f7;
+  color: #831843;
+  font-weight: 900;
+  cursor: pointer;
+}
+
+.egg-next:hover {
+  border-color: #fb7185;
+  background: #ffe4ef;
 }
 
 .fields {
