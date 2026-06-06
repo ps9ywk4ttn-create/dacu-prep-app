@@ -22,7 +22,8 @@ function isAdmin(request, env) {
   const expected = env.ADMIN_KEY || "";
   const provided = request.headers.get("X-Admin-Key") || "";
   const encoded = request.headers.get("X-Admin-Key-Encoded") || "";
-  return Boolean(expected) && (provided === expected || encoded === base64Utf8(expected));
+  const accepted = [expected, expected.replaceAll("！", "!"), expected.replaceAll("!", "！")].filter(Boolean);
+  return accepted.some((key) => provided === key || encoded === base64Utf8(key));
 }
 
 function base64Utf8(value) {
