@@ -804,12 +804,13 @@ function calculateHotSkus() {
     const name = rowValue(row, ".sku-name").trim() || `爆品${index + 1}`;
     const forecast = rowNumber(row, ".sku-forecast");
     const stock = rowNumber(row, ".sku-stock");
-    const inbound = rowNumber(row, ".sku-inbound");
+    const transit = rowNumber(row, ".sku-transit");
+    const priority = rowNumber(row, ".sku-priority");
     const safety = rowNumber(row, ".sku-safety") / 100;
     const required = thresholdRequired(forecast, safety);
-    const available = stock + inbound;
+    const available = stock + priority;
     const gap = Math.max(0, required - available);
-    return { name, forecast, stock, inbound, safety, required, available, gap };
+    return { name, forecast, stock, transit, priority, inbound: priority, safety, required, available, gap };
   }).filter((row) => row.forecast > 0 || row.available > 0);
 }
 
@@ -1186,7 +1187,7 @@ function renderHotSkus(skus) {
 
 function hotSkuStatus(sku) {
   if (sku.required <= sku.stock) return "无需处理";
-  if (sku.required <= sku.stock + sku.inbound) return "优先上架";
+  if (sku.required <= sku.stock + sku.priority) return "优先上架";
   return "调拨";
 }
 
@@ -1432,7 +1433,11 @@ function importWmsSnapshot() {
     if (!name) continue;
     if (typeof latestWmsData[`${name}可用`] === "number") row.querySelector(".sku-stock").value = latestWmsData[`${name}可用`];
     if (typeof latestWmsData[`${name}库存`] === "number") row.querySelector(".sku-stock").value = latestWmsData[`${name}库存`];
-    if (typeof latestWmsData[`${name}到货`] === "number") row.querySelector(".sku-inbound").value = latestWmsData[`${name}到货`];
+    if (typeof latestWmsData[`${name}在途`] === "number") row.querySelector(".sku-transit").value = latestWmsData[`${name}在途`];
+    if (typeof latestWmsData[`${name}在途库存`] === "number") row.querySelector(".sku-transit").value = latestWmsData[`${name}在途库存`];
+    if (typeof latestWmsData[`${name}可优先上架`] === "number") row.querySelector(".sku-priority").value = latestWmsData[`${name}可优先上架`];
+    if (typeof latestWmsData[`${name}优先上架`] === "number") row.querySelector(".sku-priority").value = latestWmsData[`${name}优先上架`];
+    if (typeof latestWmsData[`${name}到货`] === "number") row.querySelector(".sku-priority").value = latestWmsData[`${name}到货`];
   }
   for (const row of document.querySelectorAll("#safetyStockRows .safety-input-row")) {
     const name = rowValue(row, ".safety-name").trim();
@@ -1841,7 +1846,7 @@ function buildReport(result) {
     .map((row) => `- ${row.name}：订单 ${fmt(row.orders)}，商品件数 ${fmt(row.items)}，拣货件数 ${fmt(row.lines)}，出库件数 ${fmt(row.packages)}`)
     .join("\n");
   const skuLines = result.hotSkus
-    .map((sku) => `- ${sku.name}：安全需求 ${fmt(sku.required)}，仓内+到货 ${fmt(sku.available)}，缺口 ${fmt(sku.gap)}`)
+    .map((sku) => `- ${sku.name}：安全需求 ${fmt(sku.required)}，仓内 ${fmt(sku.stock)}，在途 ${fmt(sku.transit)}，可优先上架 ${fmt(sku.priority)}，缺口 ${fmt(sku.gap)}，状态 ${hotSkuStatus(sku)}`)
     .join("\n");
   const safetyLines = result.safetyStocks
     .map((item) => `- ${item.name}：阈值需求 ${fmt(item.required)}，仓内+到货 ${fmt(item.available)}，缺口 ${fmt(item.gap)}`)
@@ -1995,7 +2000,8 @@ function addSkuRow() {
     <input class="sku-name" type="text" value="爆品${nextIndex}">
     <input class="sku-forecast" type="number" min="0" value="0">
     <input class="sku-stock" type="number" min="0" value="0">
-    <input class="sku-inbound" type="number" min="0" value="0">
+    <input class="sku-transit" type="number" min="0" value="0">
+    <input class="sku-priority" type="number" min="0" value="0">
     <input class="sku-safety" type="number" min="0" step="0.1" value="8">
     <button class="icon-btn" type="button" data-remove-row>×</button>
   `;
