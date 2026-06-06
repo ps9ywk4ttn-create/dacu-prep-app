@@ -422,7 +422,7 @@ label span {
 }
 
 .sku-row-action {
-  grid-template-columns: minmax(130px, 1.05fr) repeat(5, minmax(130px, 1fr)) 48px;
+  grid-template-columns: minmax(130px, 1.05fr) repeat(6, minmax(130px, 1fr)) 48px;
   align-items: center;
 }
 
@@ -446,7 +446,7 @@ label span {
 }
 
 .sku-grid {
-  min-width: 960px;
+  min-width: 1120px;
 }
 
 .data-card:has(.sku-grid) {
