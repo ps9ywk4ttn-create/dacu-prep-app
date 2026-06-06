@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>大促准备模型测算台 V2</title>
-  <link rel="stylesheet" href="./style.css?v=20260606-cute-egg-flow">
+  <link rel="stylesheet" href="./style.css?v=20260606-egg-cycle">
 </head>
 <body>
   <section class="login-screen" id="loginScreen">
@@ -41,7 +41,7 @@
           <span class="egg-mark" aria-hidden="true"></span>
           <span class="egg-copy">
             <strong>小彩蛋</strong>
-            <small>点我</small>
+            <small>轻轻点开</small>
           </span>
         </button>
       </div>
@@ -1142,14 +1142,18 @@ Forklift在线,2
   <div class="egg-modal is-hidden" id="easterEggModal" role="dialog" aria-modal="true" aria-labelledby="easterEggTitle">
     <div class="egg-modal-card">
       <button class="egg-close" id="easterEggClose" type="button" aria-label="关闭彩蛋">×</button>
-      <h2 id="easterEggTitle">萌版彩蛋</h2>
-      <div class="egg-image-frame">
-        <img id="easterEggImage" alt="彩蛋图片">
-        <p id="easterEggPlaceholder">图片位已预留，等你给图后放这里。</p>
+      <h2 id="easterEggTitle">藏好的小彩蛋</h2>
+      <p class="egg-subtitle" id="easterEggPrompt">轻轻点一下，后面还有。</p>
+      <button class="egg-image-frame" id="easterEggStage" type="button">
+        <img id="easterEggImage" src="./egg-01.png?v=20260606-egg-cycle" alt="彩蛋图片">
+      </button>
+      <div class="egg-modal-footer">
+        <span class="egg-counter" id="easterEggCounter">1 / 10</span>
+        <button class="egg-next" id="easterEggNext" type="button">继续点一下</button>
       </div>
     </div>
   </div>
 
-  <script src="./app.js?v=20260606-cute-egg-flow"></script>
+  <script src="./app.js?v=20260606-egg-cycle"></script>
 </body>
 </html>
