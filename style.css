@@ -422,7 +422,12 @@ label span {
 }
 
 .sku-row-action {
-  grid-template-columns: minmax(96px, 1fr) repeat(5, minmax(88px, 1fr)) 48px;
+  grid-template-columns: minmax(130px, 1.05fr) repeat(5, minmax(130px, 1fr)) 48px;
+  align-items: center;
+}
+
+.sku-row-action.row-head span {
+  white-space: nowrap;
 }
 
 .safety-row-action {
@@ -438,6 +443,29 @@ label span {
 #capProcessRows {
   display: grid;
   gap: 8px;
+}
+
+.sku-grid {
+  min-width: 960px;
+}
+
+.data-card:has(.sku-grid) {
+  overflow-x: auto;
+  padding-bottom: 18px;
+}
+
+.data-card:has(.sku-grid)::-webkit-scrollbar {
+  height: 12px;
+}
+
+.data-card:has(.sku-grid)::-webkit-scrollbar-track {
+  background: #eef2f7;
+  border-radius: 999px;
+}
+
+.data-card:has(.sku-grid)::-webkit-scrollbar-thumb {
+  background: #94a3b8;
+  border-radius: 999px;
 }
 
 .material-layout,
