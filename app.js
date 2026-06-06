@@ -188,6 +188,9 @@ const easterEggAssetVersion = "20260606-egg-cycle";
 let easterEggIndex = 0;
 const templateStoreKey = "dacuPrepWarehouseTemplatesV1";
 const loginSessionKey = "dacuPrepLoginRole";
+const loginLogKey = "dacuPrepLoginLogsV1";
+const loginLogLimit = 300;
+const loginLogRemoteEndpoint = "";
 const passwords = {
   guest: "3Wildcats！",
   admin: "admin123"
@@ -272,6 +275,103 @@ function isValidPassword(role, password) {
   return false;
 }
 
+function readLoginLogs() {
+  try {
+    const parsed = JSON.parse(localStorage.getItem(loginLogKey) || "[]");
+    return Array.isArray(parsed) ? parsed : [];
+  } catch {
+    return [];
+  }
+}
+
+function writeLoginLogs(logs) {
+  localStorage.setItem(loginLogKey, JSON.stringify(logs.slice(0, loginLogLimit)));
+}
+
+function detectBrowser(userAgent) {
+  if (/Edg\//.test(userAgent)) return "Microsoft Edge";
+  if (/OPR\//.test(userAgent)) return "Opera";
+  if (/Chrome\//.test(userAgent) && !/Edg\//.test(userAgent)) return "Chrome";
+  if (/Safari\//.test(userAgent) && !/Chrome\//.test(userAgent)) return "Safari";
+  if (/Firefox\//.test(userAgent)) return "Firefox";
+  return "未知浏览器";
+}
+
+function detectOs(userAgent, platform = "") {
+  const source = `${userAgent} ${platform}`;
+  if (/Windows/i.test(source)) return "Windows";
+  if (/Android/i.test(source)) return "Android";
+  if (/iPhone|iPad|iPod/i.test(source)) return "iOS";
+  if (/Mac/i.test(source)) return "macOS";
+  if (/Linux/i.test(source)) return "Linux";
+  return platform || "未知系统";
+}
+
+function detectDeviceType() {
+  const uaDataMobile = navigator.userAgentData?.mobile;
+  if (uaDataMobile === true) return "移动设备";
+  if (/Mobi|Android|iPhone|iPad|iPod/i.test(navigator.userAgent)) return "移动设备";
+  return "电脑";
+}
+
+async function fetchClientIp() {
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), 2500);
+  try {
+    const response = await fetch("https://api.ipify.org?format=json", {
+      cache: "no-store",
+      signal: controller.signal
+    });
+    const data = await response.json();
+    return data.ip || "获取失败";
+  } catch {
+    return "获取失败";
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
+async function buildLoginLog(role, success) {
+  const userAgent = navigator.userAgent || "";
+  const platform = navigator.userAgentData?.platform || navigator.platform || "";
+  const os = detectOs(userAgent, platform);
+  const browser = detectBrowser(userAgent);
+  const deviceType = detectDeviceType();
+  const ip = await fetchClientIp();
+  return {
+    id: `${Date.now()}-${Math.random().toString(16).slice(2)}`,
+    time: new Date().toISOString(),
+    role,
+    success,
+    ip,
+    device: `${deviceType} / ${platform || os}`,
+    os,
+    browser,
+    screen: `${window.screen?.width || "-"}×${window.screen?.height || "-"}`,
+    language: navigator.language || "",
+    timezone: Intl.DateTimeFormat().resolvedOptions().timeZone || "",
+    userAgent
+  };
+}
+
+function sendRemoteLoginLog(log) {
+  if (!loginLogRemoteEndpoint) return;
+  fetch(loginLogRemoteEndpoint, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(log),
+    keepalive: true
+  }).catch(() => {});
+}
+
+function recordLoginEvent(role, success) {
+  buildLoginLog(role, success).then((log) => {
+    const logs = readLoginLogs();
+    writeLoginLogs([log, ...logs]);
+    sendRemoteLoginLog(log);
+  });
+}
+
 function showLogin() {
   document.getElementById("loginScreen").classList.remove("is-hidden");
   document.getElementById("appShell").classList.add("is-hidden");
@@ -294,9 +394,11 @@ function login() {
   const role = value("loginRole");
   const password = value("loginPassword");
   if (!isValidPassword(role, password)) {
+    recordLoginEvent(role, false);
     document.getElementById("loginError").textContent = "密码错误";
     return;
   }
+  recordLoginEvent(role, true);
   enterApp(role);
 }
 
@@ -2073,6 +2175,97 @@ function closeEasterEgg() {
   document.getElementById("easterEggModal")?.classList.add("is-hidden");
 }
 
+function formatLogTime(value) {
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return value || "-";
+  return date.toLocaleString("zh-CN", { hour12: false });
+}
+
+function roleLabel(role) {
+  return role === "admin" ? "管理员" : "访客";
+}
+
+function renderLoginLogs() {
+  const rows = document.getElementById("loginLogRows");
+  const summary = document.getElementById("loginLogSummary");
+  if (!rows) return;
+  const logs = readLoginLogs();
+  rows.innerHTML = "";
+  if (summary) {
+    const failed = logs.filter((log) => !log.success).length;
+    summary.textContent = `${logs.length} 条 / 失败 ${failed} 条`;
+  }
+  if (!logs.length) {
+    const tr = document.createElement("tr");
+    const td = document.createElement("td");
+    td.colSpan = 8;
+    td.textContent = "暂无登录日志";
+    tr.appendChild(td);
+    rows.appendChild(tr);
+    return;
+  }
+  for (const log of logs) {
+    const tr = document.createElement("tr");
+    const values = [
+      formatLogTime(log.time),
+      roleLabel(log.role),
+      log.success ? "成功" : "失败",
+      log.ip || "-",
+      log.device || "-",
+      log.os || "-",
+      log.browser || "-",
+      log.screen || "-"
+    ];
+    values.forEach((item, index) => {
+      const td = document.createElement("td");
+      td.textContent = item;
+      if (index === 2) td.className = log.success ? "log-status-ok" : "log-status-fail";
+      tr.appendChild(td);
+    });
+    rows.appendChild(tr);
+  }
+}
+
+function openLoginLogModal() {
+  if (!ensureAdminAccess()) return;
+  renderLoginLogs();
+  document.getElementById("loginLogModal")?.classList.remove("is-hidden");
+}
+
+function closeLoginLogModal() {
+  document.getElementById("loginLogModal")?.classList.add("is-hidden");
+}
+
+function exportLoginLogs() {
+  const logs = readLoginLogs();
+  const headers = ["时间", "账号", "结果", "IP", "设备信息", "系统", "浏览器", "屏幕", "语言", "时区", "User-Agent"];
+  const lines = [headers, ...logs.map((log) => [
+    formatLogTime(log.time),
+    roleLabel(log.role),
+    log.success ? "成功" : "失败",
+    log.ip || "",
+    log.device || "",
+    log.os || "",
+    log.browser || "",
+    log.screen || "",
+    log.language || "",
+    log.timezone || "",
+    log.userAgent || ""
+  ])].map((row) => row.map((cell) => `"${String(cell).replaceAll('"', '""')}"`).join(","));
+  const blob = new Blob([`\ufeff${lines.join("\n")}`], { type: "text/csv;charset=utf-8" });
+  const link = document.createElement("a");
+  link.href = URL.createObjectURL(blob);
+  link.download = `登录日志-${new Date().toISOString().slice(0, 10)}.csv`;
+  link.click();
+  URL.revokeObjectURL(link.href);
+}
+
+function clearLoginLogs() {
+  if (!confirm("确认清空当前浏览器保存的登录日志？")) return;
+  writeLoginLogs([]);
+  renderLoginLogs();
+}
+
 function renderEasterEggSlide() {
   const slide = easterEggSlides[easterEggIndex % easterEggSlides.length];
   const image = document.getElementById("easterEggImage");
@@ -2155,6 +2348,11 @@ document.getElementById("accountRole").addEventListener("change", updateAccountC
 document.getElementById("warehouseTemplate").addEventListener("change", loadSelectedWarehouseTemplate);
 document.getElementById("addWarehouseBtn").addEventListener("click", addWarehouseTemplate);
 document.getElementById("saveTemplateBtn").addEventListener("click", saveWarehouseTemplate);
+document.getElementById("loginLogBtn").addEventListener("click", openLoginLogModal);
+document.getElementById("loginLogClose").addEventListener("click", closeLoginLogModal);
+document.getElementById("refreshLoginLogBtn").addEventListener("click", renderLoginLogs);
+document.getElementById("exportLoginLogBtn").addEventListener("click", exportLoginLogs);
+document.getElementById("clearLoginLogBtn").addEventListener("click", clearLoginLogs);
 document.getElementById("easterEggBtn").addEventListener("click", openEasterEgg);
 document.getElementById("easterEggClose").addEventListener("click", closeEasterEgg);
 document.getElementById("easterEggStage").addEventListener("click", nextEasterEggSlide);
@@ -2162,8 +2360,12 @@ document.getElementById("easterEggNext").addEventListener("click", nextEasterEgg
 document.getElementById("easterEggModal").addEventListener("click", (event) => {
   if (event.target.id === "easterEggModal") closeEasterEgg();
 });
+document.getElementById("loginLogModal").addEventListener("click", (event) => {
+  if (event.target.id === "loginLogModal") closeLoginLogModal();
+});
 document.addEventListener("keydown", (event) => {
   if (event.key === "Escape") closeEasterEgg();
+  if (event.key === "Escape") closeLoginLogModal();
 });
 
 document.querySelector(".input-panel").addEventListener("click", (event) => {
