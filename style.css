@@ -526,6 +526,76 @@ textarea {
   background: #ffe4ef;
 }
 
+.log-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 55;
+  display: grid;
+  place-items: center;
+  padding: 24px;
+  background: rgba(15, 23, 42, 0.44);
+}
+
+.log-modal-card {
+  width: min(1080px, 100%);
+  max-height: min(760px, calc(100vh - 48px));
+  position: relative;
+  display: grid;
+  gap: 12px;
+  overflow: hidden;
+  padding: 22px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: #ffffff;
+  box-shadow: 0 24px 70px rgba(15, 23, 42, 0.24);
+}
+
+.log-modal-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  padding-right: 44px;
+}
+
+.log-note {
+  margin: 0;
+  color: var(--muted);
+  font-size: 13px;
+  line-height: 1.6;
+}
+
+.log-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.log-table-wrap {
+  max-height: 500px;
+  overflow: auto;
+}
+
+.log-table {
+  min-width: 980px;
+}
+
+.log-table td {
+  vertical-align: top;
+}
+
+.log-status-ok {
+  color: var(--green);
+  font-weight: 900;
+}
+
+.log-status-fail {
+  color: var(--red);
+  font-weight: 900;
+}
+
 .fields {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
