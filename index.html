@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>大促准备模型测算台 V2</title>
-  <link rel="stylesheet" href="./style.css?v=20260606-login-logs">
+  <link rel="stylesheet" href="./style.css?v=20260606-remote-login-logs">
 </head>
 <body>
   <section class="login-screen" id="loginScreen">
@@ -1168,7 +1168,8 @@ Forklift在线,2
         </div>
         <span class="status-pill" id="loginLogSummary">0 条</span>
       </div>
-      <p class="log-note">浏览器无法读取真实电脑名称；这里记录 IP、账号类型、登录结果、浏览器可见设备信息、系统、浏览器、屏幕和时区。</p>
+      <p class="log-note">浏览器无法读取真实电脑名称；这里记录 IP、账号类型、登录结果、浏览器可见设备信息、系统、浏览器、屏幕和时区。所有电脑统一日志需要配置 Cloudflare Worker 后端。</p>
+      <p class="log-mode" id="loginLogMode">日志模式：读取中</p>
       <div class="log-actions">
         <button class="btn btn-secondary" id="refreshLoginLogBtn" type="button">刷新</button>
         <button class="btn btn-secondary" id="exportLoginLogBtn" type="button">导出CSV</button>
@@ -1182,6 +1183,7 @@ Forklift在线,2
               <th>账号</th>
               <th>结果</th>
               <th>IP</th>
+              <th>地区</th>
               <th>设备信息</th>
               <th>系统</th>
               <th>浏览器</th>
@@ -1194,6 +1196,7 @@ Forklift在线,2
     </div>
   </div>
 
-  <script src="./app.js?v=20260606-login-logs"></script>
+  <script src="./config.js?v=20260606-remote-login-logs"></script>
+  <script src="./app.js?v=20260606-remote-login-logs"></script>
 </body>
 </html>
