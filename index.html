@@ -1,0 +1,1124 @@
+﻿<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>大促准备模型测算台 V2</title>
+  <link rel="stylesheet" href="./style.css">
+</head>
+<body>
+  <section class="login-screen" id="loginScreen">
+    <div class="login-card">
+      <p class="eyebrow">Warehouse Model</p>
+      <h1>登录</h1>
+      <label>
+        <span>账户类型</span>
+        <select id="loginRole">
+          <option value="guest">访客账户</option>
+          <option value="admin">管理员账户</option>
+        </select>
+      </label>
+      <label>
+        <span>密码</span>
+        <input id="loginPassword" type="password" autocomplete="current-password" placeholder="请输入密码">
+      </label>
+      <button class="btn btn-primary" id="loginBtn" type="button">
+        <span class="btn-icon" aria-hidden="true">▶</span>
+        登录
+      </button>
+      <p class="login-error" id="loginError"></p>
+    </div>
+  </section>
+
+  <div class="app-shell is-hidden" id="appShell">
+    <header class="topbar">
+      <div>
+        <p class="eyebrow" id="appEyebrow">订单结构 + 爆品库存 + 现场资源</p>
+        <h1 id="appTitle">大促准备模型测算台 V2</h1>
+      </div>
+      <div class="top-actions">
+        <label class="scenario-select account-select">
+          <span>账户</span>
+          <select id="accountRole" disabled>
+            <option value="guest">访客账户</option>
+            <option value="admin">管理员账户</option>
+          </select>
+        </label>
+        <label class="scenario-select">
+          <span>场景</span>
+          <select id="scenario">
+            <option value="warehouse">仓配大促</option>
+            <option value="capacity">产能模型场景</option>
+          </select>
+        </label>
+        <label class="scenario-select warehouse-select">
+          <span>仓库模板</span>
+          <select id="warehouseTemplate"></select>
+        </label>
+        <button class="btn btn-secondary admin-only" id="addWarehouseBtn" type="button">
+          <span class="btn-icon" aria-hidden="true">+</span>
+          新增仓库
+        </button>
+        <button class="btn btn-secondary admin-only" id="saveTemplateBtn" type="button">
+          <span class="btn-icon" aria-hidden="true">✓</span>
+          保存默认值
+        </button>
+        <button class="btn btn-secondary" id="logoutBtn" type="button">
+          <span class="btn-icon" aria-hidden="true">↥</span>
+          退出
+        </button>
+        <button class="btn btn-secondary" id="resetBtn" type="button">
+          <span class="btn-icon" aria-hidden="true">↺</span>
+          重置
+        </button>
+        <button class="btn btn-primary" id="calculateBtn" type="button">
+          <span class="btn-icon" aria-hidden="true">▶</span>
+          生成方案
+        </button>
+      </div>
+    </header>
+
+    <main class="workspace">
+      <section class="input-panel" aria-label="输入区">
+        <div class="panel-heading">
+          <div>
+            <p class="eyebrow">Input</p>
+            <h2>输入数据</h2>
+          </div>
+          <div class="panel-actions">
+            <span class="status-pill">历史结构 + 预测结构 + 仓内资源</span>
+            <button class="btn btn-primary" id="calculateInputBtn" type="button">
+              <span class="btn-icon" aria-hidden="true">▶</span>
+              开始计算
+            </button>
+          </div>
+        </div>
+
+        <div class="input-grid" id="warehouseInputView">
+          <section class="data-card accent-blue">
+            <h3>历史数据</h3>
+            <div class="fields">
+              <label>
+                <span>历史峰值日订单</span>
+                <input id="historyPeakDayOrders" type="number" min="0" value="18000">
+              </label>
+              <label>
+                <span>历史峰值小时订单</span>
+                <input id="historyPeakHourOrders" type="number" min="0" value="2600">
+              </label>
+              <label>
+                <span>历史异常率 %</span>
+                <input id="historyExceptionRate" type="number" min="0" step="0.1" value="4.5">
+              </label>
+              <label>
+                <span>历史退货/拦截率 %</span>
+                <input id="historyReturnRate" type="number" min="0" step="0.1" value="2.8">
+              </label>
+            </div>
+          </section>
+
+          <section class="data-card accent-blue">
+            <h3>历史订单结构</h3>
+            <div class="structure-grid">
+              <div class="structure-row row-head">
+                <span>类型</span>
+                <span>占比 %</span>
+              </div>
+              <label class="structure-row">
+                <span>单品单件</span>
+                <input id="historySingleSingleShare" type="number" min="0" max="100" step="0.1" value="46">
+              </label>
+              <label class="structure-row">
+                <span>单品多件</span>
+                <input id="historySingleMultiShare" type="number" min="0" max="100" step="0.1" value="18">
+              </label>
+              <label class="structure-row">
+                <span>多品单件</span>
+                <input id="historyMultiSingleShare" type="number" min="0" max="100" step="0.1" value="22">
+              </label>
+              <label class="structure-row">
+                <span>多品多件</span>
+                <input id="historyMultiMultiShare" type="number" min="0" max="100" step="0.1" value="14">
+              </label>
+            </div>
+          </section>
+
+          <section class="data-card accent-amber">
+            <h3>预测数据</h3>
+            <div class="fields">
+              <label>
+                <span>预测总订单</span>
+                <input id="forecastOrders" type="number" min="0" value="52000">
+              </label>
+              <label>
+                <span>活动天数</span>
+                <input id="campaignDays" type="number" min="1" value="3">
+              </label>
+              <label>
+                <span>峰值日占比 %</span>
+                <input id="peakDayShare" type="number" min="0" max="100" step="0.1" value="48">
+              </label>
+              <label>
+                <span>峰值小时占比 %</span>
+                <input id="peakHourShare" type="number" min="0" max="100" step="0.1" value="16">
+              </label>
+            </div>
+          </section>
+
+          <section class="data-card accent-amber">
+            <h3>预测订单结构</h3>
+            <div class="structure-grid structure-grid-wide">
+              <div class="structure-row structure-row-wide row-head">
+                <span>类型</span>
+                <span>占比 %</span>
+              </div>
+              <label class="structure-row structure-row-wide">
+                <span>单品单件</span>
+                <input id="forecastSingleSingleShare" type="number" min="0" max="100" step="0.1" value="40">
+              </label>
+              <label class="structure-row structure-row-wide">
+                <span>单品多件</span>
+                <input id="forecastSingleMultiShare" type="number" min="0" max="100" step="0.1" value="20">
+              </label>
+              <label class="structure-row structure-row-wide">
+                <span>多品单件</span>
+                <input id="forecastMultiSingleShare" type="number" min="0" max="100" step="0.1" value="22">
+              </label>
+              <label class="structure-row structure-row-wide">
+                <span>多品多件</span>
+                <input id="forecastMultiMultiShare" type="number" min="0" max="100" step="0.1" value="18">
+              </label>
+            </div>
+            <div class="fields compact-fields">
+              <label>
+                <span>单品多件中爆品占比 %</span>
+                <input id="hotSingleMultiShare" type="number" min="0" max="100" step="0.1" value="70">
+              </label>
+            </div>
+          </section>
+
+          <section class="data-card accent-orange wide-card">
+            <h3>预测SKU件型耗材用量</h3>
+            <p class="helper-text">按每100件出库配置耗材数量；系统按订单结构折算总需求，用于判断库存够不够、缺多少。</p>
+            <div class="table-wrap">
+              <table class="material-profile-table">
+                <thead>
+                  <tr>
+                    <th>SKU件型</th>
+                    <th>S箱</th>
+                    <th>M箱</th>
+                    <th>L箱</th>
+                    <th>XL箱</th>
+                    <th>S袋</th>
+                    <th>M袋</th>
+                    <th>L袋</th>
+                    <th>XL袋</th>
+                    <th>填充物</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td><strong>单品单件</strong></td>
+                    <td><input class="material-profile-share" data-scenario="warehouse" data-type="singleSingle" data-material="cartonS" type="number" min="0" step="0.1" value="12"></td>
+                    <td><input class="material-profile-share" data-scenario="warehouse" data-type="singleSingle" data-material="cartonM" type="number" min="0" step="0.1" value="6"></td>
+                    <td><input class="material-profile-share" data-scenario="warehouse" data-type="singleSingle" data-material="cartonL" type="number" min="0" step="0.1" value="2"></td>
+                    <td><input class="material-profile-share" data-scenario="warehouse" data-type="singleSingle" data-material="cartonXL" type="number" min="0" step="0.1" value="0"></td>
+                    <td><input class="material-profile-share" data-scenario="warehouse" data-type="singleSingle" data-material="bagS" type="number" min="0" step="0.1" value="48"></td>
+                    <td><input class="material-profile-share" data-scenario="warehouse" data-type="singleSingle" data-material="bagM" type="number" min="0" step="0.1" value="24"></td>
+                    <td><input class="material-profile-share" data-scenario="warehouse" data-type="singleSingle" data-material="bagL" type="number" min="0" step="0.1" value="6"></td>
+                    <td><input class="material-profile-share" data-scenario="warehouse" data-type="singleSingle" data-material="bagXL" type="number" min="0" step="0.1" value="2"></td>
+                    <td><input class="material-profile-filler" data-scenario="warehouse" data-type="singleSingle" type="number" min="0" max="100" step="0.1" value="18"></td>
+                  </tr>
+                  <tr>
+                    <td><strong>单品多件</strong></td>
+                    <td><input class="material-profile-share" data-scenario="warehouse" data-type="singleMulti" data-material="cartonS" type="number" min="0" step="0.1" value="18"></td>
+                    <td><input class="material-profile-share" data-scenario="warehouse" data-type="singleMulti" data-material="cartonM" type="number" min="0" step="0.1" value="32"></td>
+                    <td><input class="material-profile-share" data-scenario="warehouse" data-type="singleMulti" data-material="cartonL" type="number" min="0" step="0.1" value="12"></td>
+                    <td><input class="material-profile-share" data-scenario="warehouse" data-type="singleMulti" data-material="cartonXL" type="number" min="0" step="0.1" value="3"></td>
+                    <td><input class="material-profile-share" data-scenario="warehouse" data-type="singleMulti" data-material="bagS" type="number" min="0" step="0.1" value="10"></td>
+                    <td><input class="material-profile-share" data-scenario="warehouse" data-type="singleMulti" data-material="bagM" type="number" min="0" step="0.1" value="18"></td>
+                    <td><input class="material-profile-share" data-scenario="warehouse" data-type="singleMulti" data-material="bagL" type="number" min="0" step="0.1" value="6"></td>
+                    <td><input class="material-profile-share" data-scenario="warehouse" data-type="singleMulti" data-material="bagXL" type="number" min="0" step="0.1" value="1"></td>
+                    <td><input class="material-profile-filler" data-scenario="warehouse" data-type="singleMulti" type="number" min="0" max="100" step="0.1" value="36"></td>
+                  </tr>
+                  <tr>
+                    <td><strong>多品单件</strong></td>
+                    <td><input class="material-profile-share" data-scenario="warehouse" data-type="multiSingle" data-material="cartonS" type="number" min="0" step="0.1" value="10"></td>
+                    <td><input class="material-profile-share" data-scenario="warehouse" data-type="multiSingle" data-material="cartonM" type="number" min="0" step="0.1" value="28"></td>
+                    <td><input class="material-profile-share" data-scenario="warehouse" data-type="multiSingle" data-material="cartonL" type="number" min="0" step="0.1" value="14"></td>
+                    <td><input class="material-profile-share" data-scenario="warehouse" data-type="multiSingle" data-material="cartonXL" type="number" min="0" step="0.1" value="2"></td>
+                    <td><input class="material-profile-share" data-scenario="warehouse" data-type="multiSingle" data-material="bagS" type="number" min="0" step="0.1" value="12"></td>
+                    <td><input class="material-profile-share" data-scenario="warehouse" data-type="multiSingle" data-material="bagM" type="number" min="0" step="0.1" value="20"></td>
+                    <td><input class="material-profile-share" data-scenario="warehouse" data-type="multiSingle" data-material="bagL" type="number" min="0" step="0.1" value="5"></td>
+                    <td><input class="material-profile-share" data-scenario="warehouse" data-type="multiSingle" data-material="bagXL" type="number" min="0" step="0.1" value="1"></td>
+                    <td><input class="material-profile-filler" data-scenario="warehouse" data-type="multiSingle" type="number" min="0" max="100" step="0.1" value="42"></td>
+                  </tr>
+                  <tr>
+                    <td><strong>多品多件</strong></td>
+                    <td><input class="material-profile-share" data-scenario="warehouse" data-type="multiMulti" data-material="cartonS" type="number" min="0" step="0.1" value="6"></td>
+                    <td><input class="material-profile-share" data-scenario="warehouse" data-type="multiMulti" data-material="cartonM" type="number" min="0" step="0.1" value="24"></td>
+                    <td><input class="material-profile-share" data-scenario="warehouse" data-type="multiMulti" data-material="cartonL" type="number" min="0" step="0.1" value="30"></td>
+                    <td><input class="material-profile-share" data-scenario="warehouse" data-type="multiMulti" data-material="cartonXL" type="number" min="0" step="0.1" value="8"></td>
+                    <td><input class="material-profile-share" data-scenario="warehouse" data-type="multiMulti" data-material="bagS" type="number" min="0" step="0.1" value="4"></td>
+                    <td><input class="material-profile-share" data-scenario="warehouse" data-type="multiMulti" data-material="bagM" type="number" min="0" step="0.1" value="15"></td>
+                    <td><input class="material-profile-share" data-scenario="warehouse" data-type="multiMulti" data-material="bagL" type="number" min="0" step="0.1" value="10"></td>
+                    <td><input class="material-profile-share" data-scenario="warehouse" data-type="multiMulti" data-material="bagXL" type="number" min="0" step="0.1" value="3"></td>
+                    <td><input class="material-profile-filler" data-scenario="warehouse" data-type="multiMulti" type="number" min="0" max="100" step="0.1" value="58"></td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </section>
+
+          <section class="data-card accent-green wide-card">
+            <div class="card-title-row">
+              <h3>爆品 SKU 库存安全</h3>
+              <button class="mini-btn" id="addSkuBtn" type="button">+ 添加SKU</button>
+            </div>
+            <div class="sku-grid">
+              <div class="sku-row sku-row-action row-head">
+                <span>SKU</span>
+                <span>预测销量</span>
+                <span>仓内可用</span>
+                <span>确认到货</span>
+                <span>安全系数 %</span>
+                <span>操作</span>
+              </div>
+              <div id="hotSkuRows">
+                <label class="sku-row sku-row-action sku-input-row">
+                  <input class="sku-name" type="text" value="爆品A">
+                  <input class="sku-forecast" type="number" min="0" value="12000">
+                  <input class="sku-stock" type="number" min="0" value="9800">
+                  <input class="sku-inbound" type="number" min="0" value="2200">
+                  <input class="sku-safety" type="number" min="0" step="0.1" value="8">
+                  <button class="icon-btn" type="button" data-remove-row>×</button>
+                </label>
+                <label class="sku-row sku-row-action sku-input-row">
+                  <input class="sku-name" type="text" value="爆品B">
+                  <input class="sku-forecast" type="number" min="0" value="8500">
+                  <input class="sku-stock" type="number" min="0" value="9100">
+                  <input class="sku-inbound" type="number" min="0" value="0">
+                  <input class="sku-safety" type="number" min="0" step="0.1" value="8">
+                  <button class="icon-btn" type="button" data-remove-row>×</button>
+                </label>
+                <label class="sku-row sku-row-action sku-input-row">
+                  <input class="sku-name" type="text" value="爆品C">
+                  <input class="sku-forecast" type="number" min="0" value="6200">
+                  <input class="sku-stock" type="number" min="0" value="5200">
+                  <input class="sku-inbound" type="number" min="0" value="900">
+                  <input class="sku-safety" type="number" min="0" step="0.1" value="10">
+                  <button class="icon-btn" type="button" data-remove-row>×</button>
+                </label>
+                <label class="sku-row sku-row-action sku-input-row">
+                  <input class="sku-name" type="text" value="爆品D">
+                  <input class="sku-forecast" type="number" min="0" value="3800">
+                  <input class="sku-stock" type="number" min="0" value="4300">
+                  <input class="sku-inbound" type="number" min="0" value="0">
+                  <input class="sku-safety" type="number" min="0" step="0.1" value="8">
+                  <button class="icon-btn" type="button" data-remove-row>×</button>
+                </label>
+              </div>
+            </div>
+          </section>
+
+          <section class="data-card accent-green wide-card">
+            <div class="card-title-row">
+              <h3>安全库存项</h3>
+              <button class="mini-btn" id="addSafetyBtn" type="button">+ 添加库存项</button>
+            </div>
+            <div class="safety-grid">
+              <div class="safety-row safety-row-action row-head">
+                <span>库存项/SKU/库位</span>
+                <span>预测出库</span>
+                <span>当前可用</span>
+                <span>确认到货</span>
+                <span>操作</span>
+              </div>
+              <div id="safetyStockRows">
+                <label class="safety-row safety-row-action safety-input-row">
+                  <input class="safety-name" type="text" value="爆品近拣库位A">
+                  <input class="safety-forecast" type="number" min="0" value="3800">
+                  <input class="safety-stock" type="number" min="0" value="3200">
+                  <input class="safety-inbound" type="number" min="0" value="800">
+                  <button class="icon-btn" type="button" data-remove-row>×</button>
+                </label>
+                <label class="safety-row safety-row-action safety-input-row">
+                  <input class="safety-name" type="text" value="面单安全库存">
+                  <input class="safety-forecast" type="number" min="0" value="60000">
+                  <input class="safety-stock" type="number" min="0" value="62000">
+                  <input class="safety-inbound" type="number" min="0" value="0">
+                  <button class="icon-btn" type="button" data-remove-row>×</button>
+                </label>
+              </div>
+            </div>
+            <div class="fields compact-fields">
+              <label>
+                <span>阈值模式</span>
+                <select id="safetyThresholdMode">
+                  <option value="percent">剩余库存率 %</option>
+                  <option value="fixed">固定件数</option>
+                </select>
+              </label>
+              <label>
+                <span>安全库存阈值</span>
+                <input id="safetyThresholdValue" type="number" min="0" step="0.1" value="5">
+              </label>
+            </div>
+            <p class="helper-text">默认 5%：预测出库后，可用库存至少保留 5% 余量；切到固定件数后，则要求预测出库外额外保留指定件数。</p>
+          </section>
+
+          <section class="data-card accent-green wide-card">
+            <h3>现场产能</h3>
+            <div class="process-grid">
+              <div class="process-row row-head">
+                <span>工序</span>
+                <span>单人小时产能</span>
+                <span>当前人数</span>
+              </div>
+              <label class="process-row">
+                <span>拣货</span>
+                <input id="pickRate" type="number" min="1" value="95">
+                <input id="pickStaff" type="number" min="0" value="22">
+              </label>
+              <label class="process-row">
+                <span>爆品复核打包</span>
+                <input id="hotCheckPackRate" type="number" min="1" value="150">
+                <input id="hotCheckPackStaff" type="number" min="0" value="10">
+              </label>
+              <label class="process-row">
+                <span>非爆品复核打包</span>
+                <input id="normalCheckPackRate" type="number" min="1" value="90">
+                <input id="normalCheckPackStaff" type="number" min="0" value="18">
+              </label>
+              <label class="process-row">
+                <span>组发运</span>
+                <input id="shipRate" type="number" min="1" value="180">
+                <input id="shipStaff" type="number" min="0" value="8">
+              </label>
+            </div>
+            <div class="fields compact-fields">
+              <label>
+                <span>日作业小时</span>
+                <input id="workHours" type="number" min="1" max="24" value="10">
+              </label>
+              <label>
+                <span>预留缓冲 %</span>
+                <input id="bufferRate" type="number" min="0" max="100" step="0.1" value="8">
+              </label>
+            </div>
+          </section>
+
+          <section class="data-card accent-cyan">
+            <h3>设备资源</h3>
+            <div class="fields">
+              <label>
+                <span>PDA 数量</span>
+                <input id="pdaCount" type="number" min="0" value="28">
+              </label>
+              <label>
+                <span>打印机数量</span>
+                <input id="printerCount" type="number" min="0" value="7">
+              </label>
+              <label>
+                <span>单台打印机小时产能</span>
+                <input id="printerRate" type="number" min="1" value="420">
+              </label>
+              <label>
+                <span>Orderpicker 数量</span>
+                <input id="orderpickerCount" type="number" min="0" value="4">
+              </label>
+              <label>
+                <span>Orderpicker覆盖人数</span>
+                <input id="orderpickerStaffCoverage" type="number" min="1" value="1">
+              </label>
+              <label>
+                <span>Rider 数量</span>
+                <input id="riderCount" type="number" min="0" value="3">
+              </label>
+              <label>
+                <span>Rider覆盖人数</span>
+                <input id="riderStaffCoverage" type="number" min="1" value="1">
+              </label>
+              <label>
+                <span>Forklift 数量</span>
+                <input id="forkliftCount" type="number" min="0" value="2">
+              </label>
+              <label>
+                <span>Forklift覆盖人数</span>
+                <input id="forkliftStaffCoverage" type="number" min="1" value="1">
+              </label>
+              <label>
+                <span>备用设备比例 %</span>
+                <input id="equipmentReserve" type="number" min="0" max="100" step="0.1" value="10">
+              </label>
+            </div>
+            <p class="helper-text">PDA需求 = 拣货所需人数 + 组发运所需人数；Orderpicker/Rider/Forklift需求 = 拣货所需人数；现场为人工打包，不计算打包机。</p>
+          </section>
+
+          <section class="data-card accent-purple">
+            <h3>人员配置</h3>
+            <div class="fields">
+              <label>
+                <span>临时工可补人数</span>
+                <input id="tempStaffPool" type="number" min="0" value="16">
+              </label>
+              <label>
+                <span>熟练工占比 %</span>
+                <input id="skilledShare" type="number" min="0" max="100" step="0.1" value="72">
+              </label>
+              <label>
+                <span>替补人员</span>
+                <input id="backupStaff" type="number" min="0" value="6">
+              </label>
+              <label>
+                <span>可加班小时</span>
+                <input id="overtimeHours" type="number" min="0" max="12" step="0.5" value="2">
+              </label>
+            </div>
+          </section>
+
+          <section class="data-card accent-orange wide-card">
+            <h3>耗材库存：纸箱与包装袋</h3>
+            <p class="helper-text">这里仅维护库存；耗材需求按上方SKU件型耗材比例自动计算。</p>
+            <div class="material-layout">
+              <div>
+                <h4>纸箱 4 种尺寸</h4>
+                <div class="material-grid">
+                  <div class="material-row row-head">
+                    <span>尺寸</span>
+                    <span>库存</span>
+                    <span>使用占比 %</span>
+                  </div>
+                  <label class="material-row">
+                    <span>S箱</span>
+                    <input id="cartonSStock" type="number" min="0" value="18000">
+                    <input id="cartonSShare" type="number" min="0" max="100" step="0.1" value="26">
+                  </label>
+                  <label class="material-row">
+                    <span>M箱</span>
+                    <input id="cartonMStock" type="number" min="0" value="16000">
+                    <input id="cartonMShare" type="number" min="0" max="100" step="0.1" value="22">
+                  </label>
+                  <label class="material-row">
+                    <span>L箱</span>
+                    <input id="cartonLStock" type="number" min="0" value="11000">
+                    <input id="cartonLShare" type="number" min="0" max="100" step="0.1" value="14">
+                  </label>
+                  <label class="material-row">
+                    <span>XL箱</span>
+                    <input id="cartonXLStock" type="number" min="0" value="6200">
+                    <input id="cartonXLShare" type="number" min="0" max="100" step="0.1" value="8">
+                  </label>
+                </div>
+              </div>
+              <div>
+                <h4>包装袋 4 种尺寸</h4>
+                <div class="material-grid">
+                  <div class="material-row row-head">
+                    <span>尺寸</span>
+                    <span>库存</span>
+                    <span>使用占比 %</span>
+                  </div>
+                  <label class="material-row">
+                    <span>S袋</span>
+                    <input id="bagSStock" type="number" min="0" value="16000">
+                    <input id="bagSShare" type="number" min="0" max="100" step="0.1" value="15">
+                  </label>
+                  <label class="material-row">
+                    <span>M袋</span>
+                    <input id="bagMStock" type="number" min="0" value="14000">
+                    <input id="bagMShare" type="number" min="0" max="100" step="0.1" value="10">
+                  </label>
+                  <label class="material-row">
+                    <span>L袋</span>
+                    <input id="bagLStock" type="number" min="0" value="7200">
+                    <input id="bagLShare" type="number" min="0" max="100" step="0.1" value="4">
+                  </label>
+                  <label class="material-row">
+                    <span>XL袋</span>
+                    <input id="bagXLStock" type="number" min="0" value="3200">
+                    <input id="bagXLShare" type="number" min="0" max="100" step="0.1" value="1">
+                  </label>
+                </div>
+              </div>
+            </div>
+            <div class="fields compact-fields">
+              <label>
+                <span>面单库存</span>
+                <input id="labelStock" type="number" min="0" value="62000">
+              </label>
+              <label>
+                <span>胶带卷库存</span>
+                <input id="tapeStock" type="number" min="0" value="230">
+              </label>
+              <label>
+                <span>每卷胶带可处理件数</span>
+                <input id="tapeCoverage" type="number" min="1" value="260">
+              </label>
+              <label>
+                <span>包材安全系数 %</span>
+                <input id="materialSafety" type="number" min="0" step="0.1" value="5">
+              </label>
+              <label>
+                <span>填充物库存份</span>
+                <input id="fillerStock" type="number" min="0" value="36000">
+              </label>
+            </div>
+          </section>
+
+          <section class="data-card accent-red wide-card">
+            <h3>WMS 快照导入（非接口方式）</h3>
+            <div class="wms-layout">
+              <div>
+                <p class="helper-text">可从 WMS 看板/报表复制文本，或导出 CSV 后粘贴。格式：每行一个“指标,数值”。</p>
+                <textarea id="wmsSnapshot" rows="8">待拣件数,1200
+待爆品复核打包件数,320
+待非爆品复核打包件数,500
+待组发运件数,480
+库存异常SKU,12
+PDA在线,25
+打印机在线,6
+Orderpicker在线,4
+Rider在线,3
+Forklift在线,2
+纸箱S,18000
+包装袋M,14000
+填充物,36000
+爆品A可用,9800
+爆品A到货,2200
+爆品近拣库位A可用,3200
+爆品近拣库位A到货,800</textarea>
+              </div>
+              <div class="wms-actions">
+                <button class="btn btn-secondary" id="importWmsBtn" type="button">
+                  <span class="btn-icon" aria-hidden="true">⇣</span>
+                  导入WMS快照
+                </button>
+                <div class="wms-note">
+                  <strong>关于“进 WMS 自动拉取”</strong>
+                  <span>静态网页不能绕过 WMS 登录、验证码和跨域限制。非接口自动拉取可做成本机 RPA 小助手：模拟登录 WMS、打开报表、读取页面或下载 CSV，再喂给本测算台。</span>
+                </div>
+              </div>
+            </div>
+          </section>
+        </div>
+
+        <div class="input-grid is-hidden" id="capacityInputView">
+          <section class="data-card accent-blue wide-card">
+            <h3>产能模型参数</h3>
+            <div class="fields">
+              <label>
+                <span>模型名称</span>
+                <input id="capModelName" type="text" value="常规产能测算">
+              </label>
+              <label>
+                <span>峰值小时订单数</span>
+                <input id="capPeakOrders" type="number" min="0" value="2600">
+              </label>
+              <label>
+                <span>需求缓冲 %</span>
+                <input id="capBufferRate" type="number" min="0" step="0.1" value="8">
+              </label>
+              <label>
+                <span>可补人员池</span>
+                <input id="capTempStaffPool" type="number" min="0" value="12">
+              </label>
+            </div>
+          </section>
+
+          <section class="data-card accent-amber wide-card">
+            <h3>产能模型订单结构</h3>
+            <div class="cap-structure-grid" id="capStructureInputRows">
+              <div class="cap-structure-row row-head">
+                <span>订单类型</span>
+                <span>占比 %</span>
+              </div>
+              <label class="cap-structure-row cap-structure-input-row">
+                <span>单品单件</span>
+                <input class="cap-structure-share" data-type="singleSingle" type="number" min="0" step="0.1" value="45">
+              </label>
+              <label class="cap-structure-row cap-structure-input-row">
+                <span>单品多件</span>
+                <input class="cap-structure-share" data-type="singleMulti" type="number" min="0" step="0.1" value="25">
+              </label>
+              <label class="cap-structure-row cap-structure-input-row">
+                <span>多品单件</span>
+                <input class="cap-structure-share" data-type="multiSingle" type="number" min="0" step="0.1" value="20">
+              </label>
+              <label class="cap-structure-row cap-structure-input-row">
+                <span>多品多件</span>
+                <input class="cap-structure-share" data-type="multiMulti" type="number" min="0" step="0.1" value="10">
+              </label>
+            </div>
+            <div class="fields compact-fields">
+              <label>
+                <span>单品多件中爆品占比 %</span>
+                <input id="capHotSingleMultiShare" type="number" min="0" max="100" step="0.1" value="35">
+              </label>
+            </div>
+            <p class="helper-text">这里只填订单结构占比；系统按订单类型内置换算件数，用于后续工序产能测算。</p>
+          </section>
+
+          <section class="data-card accent-orange wide-card">
+            <h3>产能SKU件型耗材用量</h3>
+            <p class="helper-text">按每100件出库配置耗材数量；同一仓库下会和仓配大促模型同步。</p>
+            <div class="table-wrap">
+              <table class="material-profile-table">
+                <thead>
+                  <tr>
+                    <th>SKU件型</th>
+                    <th>S箱</th>
+                    <th>M箱</th>
+                    <th>L箱</th>
+                    <th>XL箱</th>
+                    <th>S袋</th>
+                    <th>M袋</th>
+                    <th>L袋</th>
+                    <th>XL袋</th>
+                    <th>填充物</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td><strong>单品单件</strong></td>
+                    <td><input class="material-profile-share" data-scenario="capacity" data-type="singleSingle" data-material="cartonS" type="number" min="0" step="0.1" value="12"></td>
+                    <td><input class="material-profile-share" data-scenario="capacity" data-type="singleSingle" data-material="cartonM" type="number" min="0" step="0.1" value="6"></td>
+                    <td><input class="material-profile-share" data-scenario="capacity" data-type="singleSingle" data-material="cartonL" type="number" min="0" step="0.1" value="2"></td>
+                    <td><input class="material-profile-share" data-scenario="capacity" data-type="singleSingle" data-material="cartonXL" type="number" min="0" step="0.1" value="0"></td>
+                    <td><input class="material-profile-share" data-scenario="capacity" data-type="singleSingle" data-material="bagS" type="number" min="0" step="0.1" value="48"></td>
+                    <td><input class="material-profile-share" data-scenario="capacity" data-type="singleSingle" data-material="bagM" type="number" min="0" step="0.1" value="24"></td>
+                    <td><input class="material-profile-share" data-scenario="capacity" data-type="singleSingle" data-material="bagL" type="number" min="0" step="0.1" value="6"></td>
+                    <td><input class="material-profile-share" data-scenario="capacity" data-type="singleSingle" data-material="bagXL" type="number" min="0" step="0.1" value="2"></td>
+                    <td><input class="material-profile-filler" data-scenario="capacity" data-type="singleSingle" type="number" min="0" max="100" step="0.1" value="18"></td>
+                  </tr>
+                  <tr>
+                    <td><strong>单品多件</strong></td>
+                    <td><input class="material-profile-share" data-scenario="capacity" data-type="singleMulti" data-material="cartonS" type="number" min="0" step="0.1" value="18"></td>
+                    <td><input class="material-profile-share" data-scenario="capacity" data-type="singleMulti" data-material="cartonM" type="number" min="0" step="0.1" value="32"></td>
+                    <td><input class="material-profile-share" data-scenario="capacity" data-type="singleMulti" data-material="cartonL" type="number" min="0" step="0.1" value="12"></td>
+                    <td><input class="material-profile-share" data-scenario="capacity" data-type="singleMulti" data-material="cartonXL" type="number" min="0" step="0.1" value="3"></td>
+                    <td><input class="material-profile-share" data-scenario="capacity" data-type="singleMulti" data-material="bagS" type="number" min="0" step="0.1" value="10"></td>
+                    <td><input class="material-profile-share" data-scenario="capacity" data-type="singleMulti" data-material="bagM" type="number" min="0" step="0.1" value="18"></td>
+                    <td><input class="material-profile-share" data-scenario="capacity" data-type="singleMulti" data-material="bagL" type="number" min="0" step="0.1" value="6"></td>
+                    <td><input class="material-profile-share" data-scenario="capacity" data-type="singleMulti" data-material="bagXL" type="number" min="0" step="0.1" value="1"></td>
+                    <td><input class="material-profile-filler" data-scenario="capacity" data-type="singleMulti" type="number" min="0" max="100" step="0.1" value="36"></td>
+                  </tr>
+                  <tr>
+                    <td><strong>多品单件</strong></td>
+                    <td><input class="material-profile-share" data-scenario="capacity" data-type="multiSingle" data-material="cartonS" type="number" min="0" step="0.1" value="10"></td>
+                    <td><input class="material-profile-share" data-scenario="capacity" data-type="multiSingle" data-material="cartonM" type="number" min="0" step="0.1" value="28"></td>
+                    <td><input class="material-profile-share" data-scenario="capacity" data-type="multiSingle" data-material="cartonL" type="number" min="0" step="0.1" value="14"></td>
+                    <td><input class="material-profile-share" data-scenario="capacity" data-type="multiSingle" data-material="cartonXL" type="number" min="0" step="0.1" value="2"></td>
+                    <td><input class="material-profile-share" data-scenario="capacity" data-type="multiSingle" data-material="bagS" type="number" min="0" step="0.1" value="12"></td>
+                    <td><input class="material-profile-share" data-scenario="capacity" data-type="multiSingle" data-material="bagM" type="number" min="0" step="0.1" value="20"></td>
+                    <td><input class="material-profile-share" data-scenario="capacity" data-type="multiSingle" data-material="bagL" type="number" min="0" step="0.1" value="5"></td>
+                    <td><input class="material-profile-share" data-scenario="capacity" data-type="multiSingle" data-material="bagXL" type="number" min="0" step="0.1" value="1"></td>
+                    <td><input class="material-profile-filler" data-scenario="capacity" data-type="multiSingle" type="number" min="0" max="100" step="0.1" value="42"></td>
+                  </tr>
+                  <tr>
+                    <td><strong>多品多件</strong></td>
+                    <td><input class="material-profile-share" data-scenario="capacity" data-type="multiMulti" data-material="cartonS" type="number" min="0" step="0.1" value="6"></td>
+                    <td><input class="material-profile-share" data-scenario="capacity" data-type="multiMulti" data-material="cartonM" type="number" min="0" step="0.1" value="24"></td>
+                    <td><input class="material-profile-share" data-scenario="capacity" data-type="multiMulti" data-material="cartonL" type="number" min="0" step="0.1" value="30"></td>
+                    <td><input class="material-profile-share" data-scenario="capacity" data-type="multiMulti" data-material="cartonXL" type="number" min="0" step="0.1" value="8"></td>
+                    <td><input class="material-profile-share" data-scenario="capacity" data-type="multiMulti" data-material="bagS" type="number" min="0" step="0.1" value="4"></td>
+                    <td><input class="material-profile-share" data-scenario="capacity" data-type="multiMulti" data-material="bagM" type="number" min="0" step="0.1" value="15"></td>
+                    <td><input class="material-profile-share" data-scenario="capacity" data-type="multiMulti" data-material="bagL" type="number" min="0" step="0.1" value="10"></td>
+                    <td><input class="material-profile-share" data-scenario="capacity" data-type="multiMulti" data-material="bagXL" type="number" min="0" step="0.1" value="3"></td>
+                    <td><input class="material-profile-filler" data-scenario="capacity" data-type="multiMulti" type="number" min="0" max="100" step="0.1" value="58"></td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </section>
+
+          <section class="data-card accent-green wide-card">
+            <div class="card-title-row">
+              <h3>工序产能矩阵</h3>
+              <button class="mini-btn" id="addCapProcessBtn" type="button">+ 添加工序</button>
+            </div>
+            <div class="capacity-process-grid">
+              <div class="capacity-process-row row-head">
+                <span>工序</span>
+                <span>自定义占比 %</span>
+                <span>人效 件/h</span>
+                <span>当前人数</span>
+                <span>操作</span>
+              </div>
+              <div id="capProcessRows">
+                <label class="capacity-process-row cap-process-input-row">
+                  <input class="cap-process-name" type="text" value="拣货">
+                  <input class="cap-process-share" type="number" min="0" step="0.1" value="100">
+                  <input class="cap-process-rate" type="number" min="1" value="95">
+                  <input class="cap-process-staff" type="number" min="0" value="22">
+                  <button class="icon-btn" type="button" data-remove-cap-process>×</button>
+                </label>
+                <label class="capacity-process-row cap-process-input-row">
+                  <input class="cap-process-name" type="text" value="爆品复核打包">
+                  <input class="cap-process-share" type="number" min="0" step="0.1" value="30">
+                  <input class="cap-process-rate" type="number" min="1" value="150">
+                  <input class="cap-process-staff" type="number" min="0" value="8">
+                  <button class="icon-btn" type="button" data-remove-cap-process>×</button>
+                </label>
+                <label class="capacity-process-row cap-process-input-row">
+                  <input class="cap-process-name" type="text" value="非爆品复核打包">
+                  <input class="cap-process-share" type="number" min="0" step="0.1" value="70">
+                  <input class="cap-process-rate" type="number" min="1" value="90">
+                  <input class="cap-process-staff" type="number" min="0" value="18">
+                  <button class="icon-btn" type="button" data-remove-cap-process>×</button>
+                </label>
+                <label class="capacity-process-row cap-process-input-row">
+                  <input class="cap-process-name" type="text" value="组发运">
+                  <input class="cap-process-share" type="number" min="0" step="0.1" value="100">
+                  <input class="cap-process-rate" type="number" min="1" value="180">
+                  <input class="cap-process-staff" type="number" min="0" value="8">
+                  <button class="icon-btn" type="button" data-remove-cap-process>×</button>
+                </label>
+              </div>
+            </div>
+            <p class="helper-text">拣货、爆品复核打包、非爆品复核打包、组发运按订单结构自动生成件数需求；新增自定义工序按自定义占比计算。</p>
+          </section>
+
+          <section class="data-card accent-cyan wide-card">
+            <h3>设备约束</h3>
+            <div class="fields">
+              <label>
+                <span>PDA 数量</span>
+                <input id="capPdaCount" type="number" min="0" value="32">
+              </label>
+              <label>
+                <span>备用设备比例 %</span>
+                <input id="capDeviceReserve" type="number" min="0" step="0.1" value="10">
+              </label>
+              <label>
+                <span>面单打印机数量</span>
+                <input id="capPrinterCount" type="number" min="0" value="6">
+              </label>
+              <label>
+                <span>单台面单打印机 件/h</span>
+                <input id="capPrinterRate" type="number" min="1" value="420">
+              </label>
+              <label>
+                <span>Orderpicker 数量</span>
+                <input id="capOrderpickerCount" type="number" min="0" value="4">
+              </label>
+              <label>
+                <span>Orderpicker覆盖人数</span>
+                <input id="capOrderpickerCoverage" type="number" min="1" value="1">
+              </label>
+              <label>
+                <span>Rider 数量</span>
+                <input id="capRiderCount" type="number" min="0" value="3">
+              </label>
+              <label>
+                <span>Rider覆盖人数</span>
+                <input id="capRiderCoverage" type="number" min="1" value="1">
+              </label>
+              <label>
+                <span>Forklift 数量</span>
+                <input id="capForkliftCount" type="number" min="0" value="2">
+              </label>
+              <label>
+                <span>Forklift覆盖人数</span>
+                <input id="capForkliftCoverage" type="number" min="1" value="1">
+              </label>
+            </div>
+            <p class="helper-text">PDA需求 = 拣货所需人数 + 组发运所需人数；Orderpicker/Rider/Forklift需求 = 拣货所需人数；面单打印机按非爆品复核打包件数。</p>
+          </section>
+
+          <section class="data-card accent-red wide-card">
+            <h3>监控快照</h3>
+            <div class="wms-layout">
+              <div>
+                <p class="helper-text">没有监控快照时，只输出预测产能平衡；导入后才判断实时瓶颈和实时风险。</p>
+                <textarea id="capMonitorSnapshot" rows="7">拣货待处理件数,1800
+爆品复核打包待处理件数,520
+非爆品复核打包待处理件数,1600
+组发运待处理件数,900
+异常订单,18
+设备故障,0</textarea>
+              </div>
+              <div class="wms-actions">
+                <button class="btn btn-secondary" id="importCapMonitorBtn" type="button">
+                  <span class="btn-icon" aria-hidden="true">⇣</span>
+                  导入监控快照
+                </button>
+                <div class="wms-note">
+                  <strong>产能模型口径</strong>
+                  <span>订单数用于需求来源，现场作业、人员、人效、设备、监控队列统一按件数判断。</span>
+                </div>
+              </div>
+            </div>
+          </section>
+        </div>
+      </section>
+
+      <aside class="output-panel" aria-label="输出区">
+        <div class="panel-heading">
+          <div>
+            <p class="eyebrow">Output</p>
+            <h2>输出方案</h2>
+          </div>
+          <button class="btn btn-secondary" id="exportBtn" type="button">
+            <span class="btn-icon" aria-hidden="true">⇩</span>
+            导出报告
+          </button>
+        </div>
+
+        <div id="warehouseOutputView">
+        <section class="summary-grid" id="summaryGrid">
+          <div class="metric">
+            <span>预测出库件数</span>
+            <strong id="metricPackages">-</strong>
+          </div>
+          <div class="metric">
+            <span>峰值小时需求</span>
+            <strong id="metricPeakHour">-</strong>
+          </div>
+          <div class="metric">
+            <span>瓶颈工序</span>
+            <strong id="metricBottleneck">-</strong>
+          </div>
+          <div class="metric">
+            <span>预测产能满足率</span>
+            <strong id="metricCapacityRate">-</strong>
+          </div>
+          <div class="metric">
+            <span>风险等级</span>
+            <strong id="metricRisk">-</strong>
+          </div>
+        </section>
+
+        <section class="result-block">
+          <div class="block-title">
+            <h3>订单结构测算</h3>
+            <span id="structureTag">待测算</span>
+          </div>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>订单类型</th>
+                  <th>预测订单</th>
+                  <th>商品件数</th>
+                  <th>拣货件数</th>
+                  <th>出库件数</th>
+                </tr>
+              </thead>
+              <tbody id="structureRows"></tbody>
+            </table>
+          </div>
+        </section>
+
+        <section class="result-block">
+          <div class="block-title">
+            <h3>爆品库存安全</h3>
+            <span id="skuTag">待测算</span>
+          </div>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>SKU</th>
+                  <th>安全需求</th>
+                  <th>仓内+到货</th>
+                  <th>缺口</th>
+                  <th>状态</th>
+                </tr>
+              </thead>
+              <tbody id="skuRows"></tbody>
+            </table>
+          </div>
+        </section>
+
+        <section class="result-block">
+          <div class="block-title">
+            <h3>安全库存项</h3>
+            <span id="safetyTag">待测算</span>
+          </div>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>库存项</th>
+                  <th>阈值需求</th>
+                  <th>仓内+到货</th>
+                  <th>缺口</th>
+                  <th>状态</th>
+                </tr>
+              </thead>
+              <tbody id="safetyRows"></tbody>
+            </table>
+          </div>
+        </section>
+
+        <section class="result-block">
+          <div class="block-title">
+            <h3>产能缺口</h3>
+            <span id="capacityTag">待测算</span>
+          </div>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>工序</th>
+                  <th>小时需求</th>
+                  <th>当前产能</th>
+                  <th>缺口</th>
+                  <th>建议</th>
+                </tr>
+              </thead>
+              <tbody id="capacityRows"></tbody>
+            </table>
+          </div>
+        </section>
+
+        <section class="result-block split-result">
+          <div>
+            <div class="block-title">
+              <h3>设备缺口</h3>
+            </div>
+            <ul class="result-list" id="equipmentList"></ul>
+          </div>
+          <div>
+            <div class="block-title">
+              <h3>耗材缺口</h3>
+            </div>
+            <ul class="result-list" id="consumableList"></ul>
+          </div>
+        </section>
+
+        <section class="result-block">
+          <div class="block-title">
+            <h3>补强动作</h3>
+          </div>
+          <ol class="action-list" id="actionList"></ol>
+        </section>
+
+        <section class="result-block">
+          <div class="block-title">
+            <h3>实时看板 / WMS快照</h3>
+            <span id="wmsStatus">未导入</span>
+          </div>
+          <div class="watch-grid" id="watchGrid"></div>
+          <div class="wms-grid" id="wmsGrid"></div>
+        </section>
+
+        <section class="result-block flow-preview">
+          <div class="block-title">
+            <h3>模型流程图</h3>
+          </div>
+          <img src="../大促准备模型-资源测算流程图.png" alt="大促准备模型资源测算流程图">
+        </section>
+        </div>
+
+        <div id="capacityOutputView" class="is-hidden">
+          <section class="summary-grid">
+            <div class="metric">
+              <span>峰值小时作业件数</span>
+              <strong id="capMetricDemand">-</strong>
+            </div>
+            <div class="metric">
+              <span>预测瓶颈</span>
+              <strong id="capMetricPlanBottleneck">-</strong>
+            </div>
+            <div class="metric">
+              <span>实时瓶颈</span>
+              <strong id="capMetricMonitorBottleneck">待监控输入</strong>
+            </div>
+            <div class="metric">
+              <span>实时风险</span>
+              <strong id="capMetricRisk">待监控输入</strong>
+            </div>
+          </section>
+
+          <section class="result-block">
+            <div class="block-title">
+              <h3>订单结构拆分</h3>
+              <span id="capStructureTag">待测算</span>
+            </div>
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th>订单类型</th>
+                    <th>订单数</th>
+                    <th>件数</th>
+                    <th>占比</th>
+                  </tr>
+                </thead>
+                <tbody id="capStructureRows"></tbody>
+              </table>
+            </div>
+          </section>
+
+          <section class="result-block">
+            <div class="block-title">
+              <h3>工序产能平衡</h3>
+              <span id="capBalanceTag">待测算</span>
+            </div>
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th>工序</th>
+                    <th>小时需求</th>
+                    <th>当前产能</th>
+                    <th>缺口/富余</th>
+                    <th>建议</th>
+                  </tr>
+                </thead>
+                <tbody id="capProcessOutputRows"></tbody>
+              </table>
+            </div>
+          </section>
+
+          <section class="result-block split-result">
+            <div>
+              <div class="block-title">
+                <h3>设备约束</h3>
+              </div>
+              <ul class="result-list" id="capDeviceList"></ul>
+            </div>
+            <div>
+              <div class="block-title">
+                <h3>调配建议</h3>
+              </div>
+              <ol class="action-list" id="capActionList"></ol>
+            </div>
+          </section>
+
+          <section class="result-block">
+            <div class="block-title">
+              <h3>耗材约束</h3>
+            </div>
+            <ul class="result-list" id="capConsumableList"></ul>
+          </section>
+
+          <section class="result-block">
+            <div class="block-title">
+              <h3>实时监控判断</h3>
+              <span id="capMonitorStatus">未导入</span>
+            </div>
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th>工序</th>
+                    <th>待处理件数</th>
+                    <th>当前产能</th>
+                    <th>预计清空时间</th>
+                  </tr>
+                </thead>
+                <tbody id="capMonitorRows"></tbody>
+              </table>
+            </div>
+          </section>
+        </div>
+      </aside>
+    </main>
+  </div>
+
+  <script src="./app.js"></script>
+</body>
+</html>
