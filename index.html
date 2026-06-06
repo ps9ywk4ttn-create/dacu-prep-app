@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>大促准备模型测算台 V2</title>
-  <link rel="stylesheet" href="./style.css?v=20260606-zone-stock">
+  <link rel="stylesheet" href="./style.css?v=20260606-egg-button">
 </head>
 <body>
   <section class="login-screen" id="loginScreen">
@@ -35,6 +35,12 @@
       <div>
         <p class="eyebrow" id="appEyebrow">订单结构 + 爆品库存 + 现场资源</p>
         <h1 id="appTitle">大促准备模型测算台 V2</h1>
+      </div>
+      <div class="easter-egg-slot">
+        <button class="easter-egg-btn" id="easterEggBtn" type="button" aria-haspopup="dialog">
+          <span class="egg-mark" aria-hidden="true">✦</span>
+          <span>萌版彩蛋</span>
+        </button>
       </div>
       <div class="top-actions">
         <label class="scenario-select account-select">
@@ -1130,6 +1136,17 @@ Forklift在线,2
     </main>
   </div>
 
-  <script src="./app.js?v=20260606-zone-stock"></script>
+  <div class="egg-modal is-hidden" id="easterEggModal" role="dialog" aria-modal="true" aria-labelledby="easterEggTitle">
+    <div class="egg-modal-card">
+      <button class="egg-close" id="easterEggClose" type="button" aria-label="关闭彩蛋">×</button>
+      <h2 id="easterEggTitle">萌版彩蛋</h2>
+      <div class="egg-image-frame">
+        <img id="easterEggImage" alt="彩蛋图片">
+        <p id="easterEggPlaceholder">图片位已预留，等你给图后放这里。</p>
+      </div>
+    </div>
+  </div>
+
+  <script src="./app.js?v=20260606-egg-button"></script>
 </body>
 </html>
