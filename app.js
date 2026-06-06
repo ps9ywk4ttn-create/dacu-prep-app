@@ -1185,10 +1185,9 @@ function renderHotSkus(skus) {
 }
 
 function hotSkuStatus(sku) {
-  if (sku.gap <= 0) return "安全";
-  if (sku.inbound > 0 && sku.gap <= sku.inbound) return "优先上架";
-  if (sku.inbound > 0) return "优先上架/需补货/调拨";
-  return "需补货/调拨";
+  if (sku.required <= sku.stock) return "无需处理";
+  if (sku.required <= sku.stock + sku.inbound) return "优先上架";
+  return "调拨";
 }
 
 function renderSafetyStocks(stocks) {
