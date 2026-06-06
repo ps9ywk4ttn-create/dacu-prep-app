@@ -1,7 +1,7 @@
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Methods": "GET,POST,DELETE,OPTIONS",
-  "Access-Control-Allow-Headers": "Content-Type,X-Admin-Key"
+  "Access-Control-Allow-Headers": "Content-Type,X-Admin-Key,X-Admin-Key-Encoded"
 };
 
 function json(data, status = 200) {
@@ -21,7 +21,15 @@ function unauthorized() {
 function isAdmin(request, env) {
   const expected = env.ADMIN_KEY || "";
   const provided = request.headers.get("X-Admin-Key") || "";
-  return Boolean(expected) && provided === expected;
+  const encoded = request.headers.get("X-Admin-Key-Encoded") || "";
+  return Boolean(expected) && (provided === expected || encoded === base64Utf8(expected));
+}
+
+function base64Utf8(value) {
+  const bytes = new TextEncoder().encode(value);
+  let binary = "";
+  for (const byte of bytes) binary += String.fromCharCode(byte);
+  return btoa(binary);
 }
 
 function normalizeLog(input, request) {
