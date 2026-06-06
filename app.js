@@ -304,7 +304,8 @@ function setLoginLogMode(text, type = "info") {
   element.dataset.type = type;
 }
 
-function getLoginLogAdminKey() {
+function getLoginLogAdminKey(forcePrompt = false) {
+  if (forcePrompt) sessionStorage.removeItem(loginLogAdminKeySession);
   const existing = sessionStorage.getItem(loginLogAdminKeySession);
   if (existing) return existing;
   const entered = prompt("请输入登录日志管理密钥");
@@ -320,7 +321,7 @@ function base64Utf8(value) {
   return btoa(binary);
 }
 
-async function fetchRemoteLoginLogs() {
+async function fetchRemoteLoginLogs(retry = true) {
   const adminKey = getLoginLogAdminKey();
   if (!adminKey) return null;
   const response = await fetch(loginLogApiUrl(), {
@@ -332,6 +333,10 @@ async function fetchRemoteLoginLogs() {
   });
   if (response.status === 401 || response.status === 403) {
     sessionStorage.removeItem(loginLogAdminKeySession);
+    if (retry) {
+      const nextKey = getLoginLogAdminKey(true);
+      if (nextKey) return fetchRemoteLoginLogs(false);
+    }
     throw new Error("日志管理密钥错误");
   }
   if (!response.ok) throw new Error("远程日志读取失败");
