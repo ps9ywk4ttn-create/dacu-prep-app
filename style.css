@@ -126,6 +126,48 @@ h3 {
   flex-wrap: wrap;
 }
 
+.topbar > div:first-child {
+  min-width: 320px;
+}
+
+.easter-egg-slot {
+  flex: 1 1 180px;
+  display: flex;
+  justify-content: center;
+}
+
+.easter-egg-btn {
+  min-width: 150px;
+  min-height: 46px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  border: 1px solid #fecdd3;
+  border-radius: 999px;
+  background: linear-gradient(180deg, #fff7fb 0%, #ffe4ef 100%);
+  color: #be123c;
+  font-weight: 900;
+  box-shadow: 0 10px 22px rgba(244, 63, 94, 0.16);
+  cursor: pointer;
+}
+
+.easter-egg-btn:hover {
+  border-color: #fb7185;
+  transform: translateY(-1px);
+}
+
+.egg-mark {
+  width: 24px;
+  height: 24px;
+  display: inline-grid;
+  place-items: center;
+  border-radius: 999px;
+  background: #ffffff;
+  color: #f43f5e;
+  box-shadow: inset 0 0 0 1px #fecdd3;
+}
+
 .panel-actions {
   display: flex;
   align-items: center;
@@ -340,6 +382,71 @@ textarea {
 
 .is-hidden {
   display: none !important;
+}
+
+.egg-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  display: grid;
+  place-items: center;
+  padding: 24px;
+  background: rgba(15, 23, 42, 0.42);
+}
+
+.egg-modal-card {
+  width: min(560px, 100%);
+  position: relative;
+  display: grid;
+  gap: 14px;
+  padding: 22px;
+  border: 1px solid #fecdd3;
+  border-radius: 10px;
+  background: #ffffff;
+  box-shadow: 0 24px 70px rgba(15, 23, 42, 0.24);
+}
+
+.egg-close {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  width: 34px;
+  height: 34px;
+  border: 1px solid #e2e8f0;
+  border-radius: 999px;
+  background: #ffffff;
+  color: #334155;
+  font-size: 22px;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.egg-image-frame {
+  min-height: 320px;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  border: 1px dashed #f9a8d4;
+  border-radius: 8px;
+  background: #fff7fb;
+}
+
+.egg-image-frame img {
+  width: 100%;
+  height: 100%;
+  max-height: 520px;
+  object-fit: contain;
+}
+
+.egg-image-frame img:not([src]),
+.egg-image-frame img[src=""] {
+  display: none;
+}
+
+.egg-image-frame p {
+  margin: 0;
+  color: #be123c;
+  font-weight: 800;
 }
 
 .fields {
@@ -809,6 +916,15 @@ td strong {
   .panel-actions {
     align-items: stretch;
     flex-direction: column;
+  }
+
+  .topbar > div:first-child {
+    min-width: 0;
+  }
+
+  .easter-egg-slot,
+  .easter-egg-btn {
+    width: 100%;
   }
 
   .scenario-select {
