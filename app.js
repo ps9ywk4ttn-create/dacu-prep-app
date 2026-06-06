@@ -172,6 +172,20 @@ let latestReport = "";
 let latestWmsData = {};
 let latestResult = null;
 let latestCapacityMonitor = {};
+const easterEggSlides = [
+  { image: "./egg-01.png", prompt: "轻轻点一下，后面还有。" },
+  { image: "./egg-02.png", prompt: "刚开始，不许现在退出。" },
+  { image: "./egg-03.png", prompt: "再点一下，会更可爱一点。" },
+  { image: "./egg-04.png", prompt: "你已经发现隐藏路线了。" },
+  { image: "./egg-05.png", prompt: "继续，下一张才是重点。" },
+  { image: "./egg-06.png", prompt: "还没结束，往下点。" },
+  { image: "./egg-07.png", prompt: "第七张，已经很会玩了。" },
+  { image: "./egg-08.png", prompt: "再来一下，快接近尾声。" },
+  { image: "./egg-09.png", prompt: "倒数第二张，别停。" },
+  { image: "./egg-10.png", prompt: "最后一张，再点就从第一张重新开始。" }
+];
+const easterEggAssetVersion = "20260606-egg-cycle";
+let easterEggIndex = 0;
 const templateStoreKey = "dacuPrepWarehouseTemplatesV1";
 const loginSessionKey = "dacuPrepLoginRole";
 const passwords = {
@@ -2049,18 +2063,29 @@ function resetForm() {
 
 function openEasterEgg() {
   const modal = document.getElementById("easterEggModal");
-  const image = document.getElementById("easterEggImage");
-  const placeholder = document.getElementById("easterEggPlaceholder");
   if (!modal) return;
-  if (placeholder && image) {
-    const hasImage = Boolean(image.getAttribute("src"));
-    placeholder.classList.toggle("is-hidden", hasImage);
-  }
+  easterEggIndex = 0;
+  renderEasterEggSlide();
   modal.classList.remove("is-hidden");
 }
 
 function closeEasterEgg() {
   document.getElementById("easterEggModal")?.classList.add("is-hidden");
+}
+
+function renderEasterEggSlide() {
+  const slide = easterEggSlides[easterEggIndex % easterEggSlides.length];
+  const image = document.getElementById("easterEggImage");
+  const prompt = document.getElementById("easterEggPrompt");
+  const counter = document.getElementById("easterEggCounter");
+  if (image) image.src = `${slide.image}?v=${easterEggAssetVersion}`;
+  if (prompt) prompt.textContent = slide.prompt;
+  if (counter) counter.textContent = `${easterEggIndex + 1} / ${easterEggSlides.length}`;
+}
+
+function nextEasterEggSlide() {
+  easterEggIndex = (easterEggIndex + 1) % easterEggSlides.length;
+  renderEasterEggSlide();
 }
 
 function addSkuRow() {
@@ -2132,6 +2157,8 @@ document.getElementById("addWarehouseBtn").addEventListener("click", addWarehous
 document.getElementById("saveTemplateBtn").addEventListener("click", saveWarehouseTemplate);
 document.getElementById("easterEggBtn").addEventListener("click", openEasterEgg);
 document.getElementById("easterEggClose").addEventListener("click", closeEasterEgg);
+document.getElementById("easterEggStage").addEventListener("click", nextEasterEggSlide);
+document.getElementById("easterEggNext").addEventListener("click", nextEasterEggSlide);
 document.getElementById("easterEggModal").addEventListener("click", (event) => {
   if (event.target.id === "easterEggModal") closeEasterEgg();
 });
