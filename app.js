@@ -1177,11 +1177,18 @@ function renderHotSkus(skus) {
       <td>${fmt(sku.required)}</td>
       <td>${fmt(sku.available)}</td>
       <td><span class="${tagClass(sku.gap, ratio)}">${fmt(sku.gap)}</span></td>
-      <td>${sku.gap > 0 ? "需补货/调拨" : "安全"}</td>
+      <td>${hotSkuStatus(sku)}</td>
     `;
     tbody.appendChild(tr);
   }
   setPill("skuTag", "库存安全", `风险SKU ${skus.filter((sku) => sku.gap > 0).length} 个`, skus.some((sku) => sku.gap > 0));
+}
+
+function hotSkuStatus(sku) {
+  if (sku.gap <= 0) return "安全";
+  if (sku.inbound > 0 && sku.gap <= sku.inbound) return "优先上架";
+  if (sku.inbound > 0) return "优先上架/需补货/调拨";
+  return "需补货/调拨";
 }
 
 function renderSafetyStocks(stocks) {
