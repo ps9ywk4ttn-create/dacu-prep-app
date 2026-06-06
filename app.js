@@ -2047,6 +2047,22 @@ function resetForm() {
   updateScenarioTitle();
 }
 
+function openEasterEgg() {
+  const modal = document.getElementById("easterEggModal");
+  const image = document.getElementById("easterEggImage");
+  const placeholder = document.getElementById("easterEggPlaceholder");
+  if (!modal) return;
+  if (placeholder && image) {
+    const hasImage = Boolean(image.getAttribute("src"));
+    placeholder.classList.toggle("is-hidden", hasImage);
+  }
+  modal.classList.remove("is-hidden");
+}
+
+function closeEasterEgg() {
+  document.getElementById("easterEggModal")?.classList.add("is-hidden");
+}
+
 function addSkuRow() {
   const container = document.getElementById("hotSkuRows");
   const nextIndex = container.querySelectorAll(".sku-input-row").length + 1;
@@ -2114,6 +2130,14 @@ document.getElementById("accountRole").addEventListener("change", updateAccountC
 document.getElementById("warehouseTemplate").addEventListener("change", loadSelectedWarehouseTemplate);
 document.getElementById("addWarehouseBtn").addEventListener("click", addWarehouseTemplate);
 document.getElementById("saveTemplateBtn").addEventListener("click", saveWarehouseTemplate);
+document.getElementById("easterEggBtn").addEventListener("click", openEasterEgg);
+document.getElementById("easterEggClose").addEventListener("click", closeEasterEgg);
+document.getElementById("easterEggModal").addEventListener("click", (event) => {
+  if (event.target.id === "easterEggModal") closeEasterEgg();
+});
+document.addEventListener("keydown", (event) => {
+  if (event.key === "Escape") closeEasterEgg();
+});
 
 document.querySelector(".input-panel").addEventListener("click", (event) => {
   const button = event.target.closest("[data-remove-row]");
