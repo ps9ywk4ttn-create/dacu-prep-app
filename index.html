@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>大促准备模型测算台 V2</title>
-  <link rel="stylesheet" href="./style.css?v=20260606-egg-cycle">
+  <link rel="stylesheet" href="./style.css?v=20260606-login-logs">
 </head>
 <body>
   <section class="login-screen" id="loginScreen">
@@ -71,6 +71,10 @@
         <button class="btn btn-secondary admin-only" id="saveTemplateBtn" type="button">
           <span class="btn-icon" aria-hidden="true">✓</span>
           保存默认值
+        </button>
+        <button class="btn btn-secondary admin-only" id="loginLogBtn" type="button">
+          <span class="btn-icon" aria-hidden="true">☷</span>
+          登录日志
         </button>
         <button class="btn btn-secondary" id="logoutBtn" type="button">
           <span class="btn-icon" aria-hidden="true">↥</span>
@@ -1154,6 +1158,42 @@ Forklift在线,2
     </div>
   </div>
 
-  <script src="./app.js?v=20260606-egg-cycle"></script>
+  <div class="log-modal is-hidden" id="loginLogModal" role="dialog" aria-modal="true" aria-labelledby="loginLogTitle">
+    <div class="log-modal-card">
+      <button class="egg-close" id="loginLogClose" type="button" aria-label="关闭登录日志">×</button>
+      <div class="log-modal-head">
+        <div>
+          <p class="eyebrow">Admin</p>
+          <h2 id="loginLogTitle">登录日志</h2>
+        </div>
+        <span class="status-pill" id="loginLogSummary">0 条</span>
+      </div>
+      <p class="log-note">浏览器无法读取真实电脑名称；这里记录 IP、账号类型、登录结果、浏览器可见设备信息、系统、浏览器、屏幕和时区。</p>
+      <div class="log-actions">
+        <button class="btn btn-secondary" id="refreshLoginLogBtn" type="button">刷新</button>
+        <button class="btn btn-secondary" id="exportLoginLogBtn" type="button">导出CSV</button>
+        <button class="btn btn-secondary" id="clearLoginLogBtn" type="button">清空日志</button>
+      </div>
+      <div class="table-wrap log-table-wrap">
+        <table class="log-table">
+          <thead>
+            <tr>
+              <th>时间</th>
+              <th>账号</th>
+              <th>结果</th>
+              <th>IP</th>
+              <th>设备信息</th>
+              <th>系统</th>
+              <th>浏览器</th>
+              <th>屏幕</th>
+            </tr>
+          </thead>
+          <tbody id="loginLogRows"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <script src="./app.js?v=20260606-login-logs"></script>
 </body>
 </html>
