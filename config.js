@@ -1,0 +1,1 @@
+window.DACU_LOGIN_LOG_ENDPOINT = "";
