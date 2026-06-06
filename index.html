@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>大促准备模型测算台 V2</title>
-  <link rel="stylesheet" href="./style.css?v=20260606-sku-scroll">
+  <link rel="stylesheet" href="./style.css?v=20260606-zone-stock">
 </head>
 <body>
   <section class="login-screen" id="loginScreen">
@@ -279,7 +279,8 @@
               <div class="sku-row sku-row-action row-head">
                 <span>SKU</span>
                 <span>预测销量</span>
-                <span>仓内可用</span>
+                <span>拣选区库存</span>
+                <span>存储区库存</span>
                 <span>在途库存</span>
                 <span>可优先上架</span>
                 <span>安全系数 %</span>
@@ -289,7 +290,8 @@
                 <label class="sku-row sku-row-action sku-input-row">
                   <input class="sku-name" type="text" value="爆品A">
                   <input class="sku-forecast" type="number" min="0" value="12000">
-                  <input class="sku-stock" type="number" min="0" value="9800">
+                  <input class="sku-pick-stock" type="number" min="0" value="9800">
+                  <input class="sku-storage-stock" type="number" min="0" value="0">
                   <input class="sku-transit" type="number" min="0" value="3600">
                   <input class="sku-priority" type="number" min="0" value="2200">
                   <input class="sku-safety" type="number" min="0" step="0.1" value="8">
@@ -298,7 +300,8 @@
                 <label class="sku-row sku-row-action sku-input-row">
                   <input class="sku-name" type="text" value="爆品B">
                   <input class="sku-forecast" type="number" min="0" value="8500">
-                  <input class="sku-stock" type="number" min="0" value="9100">
+                  <input class="sku-pick-stock" type="number" min="0" value="9100">
+                  <input class="sku-storage-stock" type="number" min="0" value="0">
                   <input class="sku-transit" type="number" min="0" value="1200">
                   <input class="sku-priority" type="number" min="0" value="0">
                   <input class="sku-safety" type="number" min="0" step="0.1" value="8">
@@ -307,7 +310,8 @@
                 <label class="sku-row sku-row-action sku-input-row">
                   <input class="sku-name" type="text" value="爆品C">
                   <input class="sku-forecast" type="number" min="0" value="6200">
-                  <input class="sku-stock" type="number" min="0" value="5200">
+                  <input class="sku-pick-stock" type="number" min="0" value="5200">
+                  <input class="sku-storage-stock" type="number" min="0" value="0">
                   <input class="sku-transit" type="number" min="0" value="1800">
                   <input class="sku-priority" type="number" min="0" value="900">
                   <input class="sku-safety" type="number" min="0" step="0.1" value="10">
@@ -316,7 +320,8 @@
                 <label class="sku-row sku-row-action sku-input-row">
                   <input class="sku-name" type="text" value="爆品D">
                   <input class="sku-forecast" type="number" min="0" value="3800">
-                  <input class="sku-stock" type="number" min="0" value="4300">
+                  <input class="sku-pick-stock" type="number" min="0" value="4300">
+                  <input class="sku-storage-stock" type="number" min="0" value="0">
                   <input class="sku-transit" type="number" min="0" value="600">
                   <input class="sku-priority" type="number" min="0" value="0">
                   <input class="sku-safety" type="number" min="0" step="0.1" value="8">
@@ -589,8 +594,9 @@ Forklift在线,2
 纸箱S,18000
 包装袋M,14000
 填充物,36000
-爆品A可用,9800
-爆品A到货,2200
+爆品A拣选区库存,9800
+爆品A存储区库存,0
+爆品A可优先上架,2200
 爆品近拣库位A可用,3200
 爆品近拣库位A到货,800</textarea>
               </div>
@@ -926,7 +932,7 @@ Forklift在线,2
                 <tr>
                   <th>SKU</th>
                   <th>安全需求</th>
-                    <th>仓内+可上架</th>
+                  <th>拣选+存储+可上架</th>
                   <th>缺口</th>
                   <th>状态</th>
                 </tr>
@@ -1124,6 +1130,6 @@ Forklift在线,2
     </main>
   </div>
 
-  <script src="./app.js?v=20260606-sku-row-fix"></script>
+  <script src="./app.js?v=20260606-zone-stock"></script>
 </body>
 </html>
