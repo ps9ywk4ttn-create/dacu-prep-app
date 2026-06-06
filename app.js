@@ -614,6 +614,7 @@ function applyTemplateSnapshot(scenario, snapshot, shared) {
     }
   }
   applySharedData(scenario, shared);
+  normalizeHotSkuRows();
   latestWmsData = {};
   latestCapacityMonitor = {};
 }
@@ -710,6 +711,34 @@ function thresholdRequired(forecast, explicitSafetyPercent = 0) {
   return Math.max(explicitRequired, forecast / Math.max(1 - rate, 0.05));
 }
 
+function normalizeHotSkuRows() {
+  for (const row of document.querySelectorAll("#hotSkuRows .sku-input-row")) {
+    if (row.querySelector(".sku-transit") && row.querySelector(".sku-priority") && row.querySelector(".sku-safety")) continue;
+    const name = rowValue(row, ".sku-name").trim() || row.querySelector("input")?.value || "";
+    const forecast = rowValue(row, ".sku-forecast") || "0";
+    const stock = rowValue(row, ".sku-stock") || "0";
+    const oldInbound = rowValue(row, ".sku-inbound") || "0";
+    const safety = rowValue(row, ".sku-safety") || "8";
+    row.innerHTML = `
+      <input class="sku-name" type="text" value="${escapeAttr(name)}">
+      <input class="sku-forecast" type="number" min="0" value="${escapeAttr(forecast)}">
+      <input class="sku-stock" type="number" min="0" value="${escapeAttr(stock)}">
+      <input class="sku-transit" type="number" min="0" value="${escapeAttr(oldInbound)}">
+      <input class="sku-priority" type="number" min="0" value="${escapeAttr(oldInbound)}">
+      <input class="sku-safety" type="number" min="0" step="0.1" value="${escapeAttr(safety)}">
+      <button class="icon-btn" type="button" data-remove-row>×</button>
+    `;
+  }
+}
+
+function escapeAttr(value) {
+  return String(value ?? "")
+    .replaceAll("&", "&amp;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;");
+}
+
 function tagClass(gap, ratio) {
   if (gap <= 0) return "tag-ok";
   if (ratio <= 0.18) return "tag-warn";
@@ -800,6 +829,7 @@ function calculateStructure() {
 }
 
 function calculateHotSkus() {
+  normalizeHotSkuRows();
   return [...document.querySelectorAll("#hotSkuRows .sku-input-row")].map((row, index) => {
     const name = rowValue(row, ".sku-name").trim() || `爆品${index + 1}`;
     const forecast = rowNumber(row, ".sku-forecast");
