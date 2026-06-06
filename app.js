@@ -190,7 +190,8 @@ const templateStoreKey = "dacuPrepWarehouseTemplatesV1";
 const loginSessionKey = "dacuPrepLoginRole";
 const loginLogKey = "dacuPrepLoginLogsV1";
 const loginLogLimit = 300;
-const loginLogRemoteEndpoint = "";
+const loginLogRemoteEndpoint = window.DACU_LOGIN_LOG_ENDPOINT || "";
+const loginLogAdminKeySession = "dacuPrepLoginLogAdminKey";
 const passwords = {
   guest: "3Wildcats！",
   admin: "admin123"
@@ -288,6 +289,64 @@ function writeLoginLogs(logs) {
   localStorage.setItem(loginLogKey, JSON.stringify(logs.slice(0, loginLogLimit)));
 }
 
+function hasRemoteLoginLogEndpoint() {
+  return Boolean(String(loginLogRemoteEndpoint || "").trim());
+}
+
+function loginLogApiUrl() {
+  return `${String(loginLogRemoteEndpoint).replace(/\/+$/, "")}/logs`;
+}
+
+function setLoginLogMode(text, type = "info") {
+  const element = document.getElementById("loginLogMode");
+  if (!element) return;
+  element.textContent = text;
+  element.dataset.type = type;
+}
+
+function getLoginLogAdminKey() {
+  const existing = sessionStorage.getItem(loginLogAdminKeySession);
+  if (existing) return existing;
+  const entered = prompt("请输入登录日志管理密钥");
+  if (!entered) return "";
+  sessionStorage.setItem(loginLogAdminKeySession, entered);
+  return entered;
+}
+
+async function fetchRemoteLoginLogs() {
+  const adminKey = getLoginLogAdminKey();
+  if (!adminKey) return null;
+  const response = await fetch(loginLogApiUrl(), {
+    method: "GET",
+    headers: {
+      "X-Admin-Key": adminKey
+    },
+    cache: "no-store"
+  });
+  if (response.status === 401 || response.status === 403) {
+    sessionStorage.removeItem(loginLogAdminKeySession);
+    throw new Error("日志管理密钥错误");
+  }
+  if (!response.ok) throw new Error("远程日志读取失败");
+  const data = await response.json();
+  return Array.isArray(data.logs) ? data.logs : [];
+}
+
+async function loadLoginLogsForAdmin() {
+  if (!hasRemoteLoginLogEndpoint()) {
+    setLoginLogMode("日志模式：本机日志。当前还没有配置远程后端，所以只能看到本浏览器记录。", "warn");
+    return readLoginLogs();
+  }
+  try {
+    const logs = await fetchRemoteLoginLogs();
+    setLoginLogMode("日志模式：远程统一日志。显示所有使用此链接登录后的记录。", "ok");
+    return logs;
+  } catch (error) {
+    setLoginLogMode(`日志模式：远程读取失败，${error.message}。当前显示本机日志。`, "warn");
+    return readLoginLogs();
+  }
+}
+
 function detectBrowser(userAgent) {
   if (/Edg\//.test(userAgent)) return "Microsoft Edge";
   if (/OPR\//.test(userAgent)) return "Opera";
@@ -355,8 +414,8 @@ async function buildLoginLog(role, success) {
 }
 
 function sendRemoteLoginLog(log) {
-  if (!loginLogRemoteEndpoint) return;
-  fetch(loginLogRemoteEndpoint, {
+  if (!hasRemoteLoginLogEndpoint()) return;
+  fetch(loginLogApiUrl(), {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(log),
@@ -2185,11 +2244,12 @@ function roleLabel(role) {
   return role === "admin" ? "管理员" : "访客";
 }
 
-function renderLoginLogs() {
+async function renderLoginLogs() {
   const rows = document.getElementById("loginLogRows");
   const summary = document.getElementById("loginLogSummary");
   if (!rows) return;
-  const logs = readLoginLogs();
+  rows.innerHTML = `<tr><td colspan="8">正在读取登录日志...</td></tr>`;
+  const logs = await loadLoginLogsForAdmin();
   rows.innerHTML = "";
   if (summary) {
     const failed = logs.filter((log) => !log.success).length;
@@ -2198,7 +2258,7 @@ function renderLoginLogs() {
   if (!logs.length) {
     const tr = document.createElement("tr");
     const td = document.createElement("td");
-    td.colSpan = 8;
+    td.colSpan = 9;
     td.textContent = "暂无登录日志";
     tr.appendChild(td);
     rows.appendChild(tr);
@@ -2211,6 +2271,7 @@ function renderLoginLogs() {
       roleLabel(log.role),
       log.success ? "成功" : "失败",
       log.ip || "-",
+      [log.country, log.city].filter(Boolean).join(" / ") || "-",
       log.device || "-",
       log.os || "-",
       log.browser || "-",
@@ -2228,22 +2289,23 @@ function renderLoginLogs() {
 
 function openLoginLogModal() {
   if (!ensureAdminAccess()) return;
-  renderLoginLogs();
   document.getElementById("loginLogModal")?.classList.remove("is-hidden");
+  renderLoginLogs();
 }
 
 function closeLoginLogModal() {
   document.getElementById("loginLogModal")?.classList.add("is-hidden");
 }
 
-function exportLoginLogs() {
-  const logs = readLoginLogs();
-  const headers = ["时间", "账号", "结果", "IP", "设备信息", "系统", "浏览器", "屏幕", "语言", "时区", "User-Agent"];
+async function exportLoginLogs() {
+  const logs = await loadLoginLogsForAdmin();
+  const headers = ["时间", "账号", "结果", "IP", "地区", "设备信息", "系统", "浏览器", "屏幕", "语言", "时区", "User-Agent"];
   const lines = [headers, ...logs.map((log) => [
     formatLogTime(log.time),
     roleLabel(log.role),
     log.success ? "成功" : "失败",
     log.ip || "",
+    [log.country, log.city].filter(Boolean).join(" / "),
     log.device || "",
     log.os || "",
     log.browser || "",
@@ -2260,8 +2322,21 @@ function exportLoginLogs() {
   URL.revokeObjectURL(link.href);
 }
 
-function clearLoginLogs() {
-  if (!confirm("确认清空当前浏览器保存的登录日志？")) return;
+async function clearLoginLogs() {
+  const target = hasRemoteLoginLogEndpoint() ? "远程统一登录日志" : "当前浏览器保存的登录日志";
+  if (!confirm(`确认清空${target}？`)) return;
+  if (hasRemoteLoginLogEndpoint()) {
+    const adminKey = getLoginLogAdminKey();
+    if (!adminKey) return;
+    const response = await fetch(loginLogApiUrl(), {
+      method: "DELETE",
+      headers: { "X-Admin-Key": adminKey }
+    });
+    if (!response.ok) {
+      alert("远程日志清空失败");
+      return;
+    }
+  }
   writeLoginLogs([]);
   renderLoginLogs();
 }
